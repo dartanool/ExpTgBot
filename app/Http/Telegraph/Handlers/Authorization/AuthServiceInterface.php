@@ -8,5 +8,5 @@ use DefStudio\Telegraph\Handlers\EmptyWebhookHandler;
 interface AuthServiceInterface
 {
 
-    public function handle(string $text = null): void;
+    public function handle(string $text = null, Message $message): void;
 }

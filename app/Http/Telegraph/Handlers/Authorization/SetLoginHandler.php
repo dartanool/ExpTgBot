@@ -4,22 +4,18 @@ namespace App\Http\Telegraph\Handlers\Authorization;
 
 use App\Models\Telegraph\TelegramUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
-use DefStudio\Telegraph\Handlers\EmptyWebhookHandler;
 
-class SetLoginHandler implements AuthServiceInterface
+class SetLoginHandler
 {
-    public function handle(string $text = null): void
+    public function handle(int $userId, string $login ): void
     {
-        EmptyWebhookHandler::query()->reply("login");
-        $this->reply("login");
-
-        $userId = $this->message->from()->id();
 
         TelegramUserState::query()->updateOrCreate(
             ['user_id' => $userId],
-            ['state' => 'awaiting_login', 'data' => null]
+            ['state' => 'awaiting_password', 'data' => $login]
         );
-        Telegraph::message(' Введите сначала логин. Пример: Иванов И.В.')->send();
+
+        Telegraph::message(' Введите пароль без пробелов.')->send();
 
     }
 
