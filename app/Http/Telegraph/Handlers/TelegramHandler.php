@@ -2,21 +2,13 @@
 
 namespace App\Http\Telegraph\Handlers;
 
-use App\Http\Telegraph\Handlers\Authorization\CompleteAuthHandler;
 use App\Http\Telegraph\Handlers\Authorization\SetLoginHandler;
 use App\Http\Telegraph\Handlers\Authorization\SetPasswordHandler;
 use App\Models\Telegraph\TelegramUserState;
-use App\Models\Telegraph\TelegraphUsers;
 use DefStudio\Telegraph\Facades\Telegraph;
-use DefStudio\Telegraph\Handlers\EmptyWebhookHandler;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use DefStudio\Telegraph\Keyboard\Button;
 use DefStudio\Telegraph\Keyboard\Keyboard;
-use DefStudio\Telegraph\Keyboard\ReplyButton;
-use DefStudio\Telegraph\Keyboard\ReplyKeyboard;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-use SebastianBergmann\Type\CallableType;
 use Illuminate\Support\Stringable;
 
 
@@ -42,8 +34,9 @@ class TelegramHandler extends WebhookHandler
         );
         Telegraph::message(' Введите сначала логин. Пример: Иванов И.В.')->send();
 
-
     }
+
+
     public function handleChatMessage(Stringable $text): void
     {
 

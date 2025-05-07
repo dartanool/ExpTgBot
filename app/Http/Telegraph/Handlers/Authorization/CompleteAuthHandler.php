@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Telegraph\Handlers\Authorization;
+use App\Http\Telegraph\API\GetSession;
 use App\Models\Telegraph\TelegraphUsers;
 use App\Models\Telegraph\TelegramUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
@@ -19,11 +20,14 @@ class CompleteAuthHandler
 
     public function handle(int $userId, string $login, string $password): void
     {
-        $token = $this->getSession($login, $password);
+        $getSession = new GetSession();
+        $token = $getSession->handle($login, $password);
 
         if ($token) {
             Telegraph::message("Вы успешно авторизовались")->send();
             Telegraph::message("$token")->send();
+
+            $this->location();
 
             TelegraphUsers::updateOrCreate(
                 ['user_id' => $userId],
@@ -34,16 +38,21 @@ class CompleteAuthHandler
         }
     }
 
-    private function getSession(string $login, string $password): string
-    {
-        $response = Http::withHeaders([
-            'Authorization' => 'Basic '. $this->apiToken,
-            'Content-Type' => 'application/json',
-        ])->post($this->baseUrl.'GetSession', [
-            'Username' => $login,
-            'Password' => $password
-        ]);
+//    private function getSession(string $login, string $password): string
+//    {
+//        $response = Http::withHeaders([
+//            'Authorization' => 'Basic '. $this->apiToken,
+//            'Content-Type' => 'application/json',
+//        ])->post($this->baseUrl.'GetSession', [
+//            'Username' => $login,
+//            'Password' => $password
+//        ]);
+//
+//        return $response->json()['Pragma'] ?? '';
+//    }
 
-        return $response->json()['Pragma'] ?? '';
+    public function location()
+    {
+        Telegraph::message("На какой станции вы находитесь")->send();
     }
 }
