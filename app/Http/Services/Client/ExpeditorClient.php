@@ -15,12 +15,12 @@ class ExpeditorClient
         $this->baseUrl = env('API_BASE_URL');
     }
 
-    public function send(array $data)
+    public function send(string $method, array $data)
     {
         $response = Http::withHeaders([
             'Authorization' => 'Basic '. $this->apiToken,
             'Content-Type' => 'application/json',
-        ])->post($this->baseUrl.'GetSession', $data);
+        ])->post($this->baseUrl.$method, $data);
 
         return $response->json();
     }

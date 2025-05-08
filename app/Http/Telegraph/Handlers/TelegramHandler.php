@@ -4,6 +4,7 @@ namespace App\Http\Telegraph\Handlers;
 
 use App\Http\Telegraph\Handlers\Authorization\SetLoginHandler;
 use App\Http\Telegraph\Handlers\Authorization\SetPasswordHandler;
+use App\Http\Telegraph\Keyboards\StartKeyboard;
 use App\Models\Telegraph\TelegramUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
@@ -18,9 +19,7 @@ class TelegramHandler extends WebhookHandler
     public function start(): void
     {
         Telegraph::message('Добро пожаловать. Вам необходимо авторизоваться.')
-            ->keyboard(Keyboard::make()->buttons([
-                Button::make('Авторизация')->action('auth')
-            ]))->send();
+            ->keyboard(StartKeyboard::handle())->send();
     }
 
 
@@ -51,13 +50,11 @@ class TelegramHandler extends WebhookHandler
 
         switch ($userState->state) {
             case 'awaiting_login':
-                (new SetLoginHandler())->
-                handle($userId, $text->toString());
+                (new SetLoginHandler())->handle($userId, $text->toString());
                 break;
 
             case 'awaiting_password':
-                (new SetPasswordHandler())->
-                handle($userId, $text->toString());
+                (new SetPasswordHandler())->handle($userId, $text->toString());
                 break;
         }
     }

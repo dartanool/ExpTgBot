@@ -20,7 +20,8 @@ class GetSession
             'Password' => $password
         ];
 
-        $response = $this->expeditorClient->send($data);
+        $method ='GetSession';
+        $response = $this->expeditorClient->send($method, $data);
 
         return $response['Pragma'];
     }
