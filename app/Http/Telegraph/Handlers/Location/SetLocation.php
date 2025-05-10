@@ -32,24 +32,15 @@ class SetLocation
     public function setCity(string $city)
     {
         $getCityId = new GetCityIdAPI();
-        Telegraph::message("$city")->send();
-
         $cityId = $getCityId->handle($this->chatId, $city);
 
-        Telegraph::message("$cityId")->send();
-
-
         if ($cityId) {
-            Telegraph::message("Вы успешно авторизовались")->send();
-            Telegraph::message("$cityId")->send();
-
             TelegraphUserState::query()->updateOrCreate(
                 ['user_id' => $this->chatId],
-                ['state' => 'awaiting_city', 'data' => $cityId]
+                ['state' => 'awaiting_station', 'data' => $cityId]
             );
 
+            Telegraph::message('Введите станцию. Пример: Курская')->send();
         }
-
-
     }
 }

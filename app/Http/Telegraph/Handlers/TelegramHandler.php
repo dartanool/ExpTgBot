@@ -5,6 +5,7 @@ namespace App\Http\Telegraph\Handlers;
 use App\Http\Telegraph\Handlers\Authorization\SetLoginHandler;
 use App\Http\Telegraph\Handlers\Authorization\SetPasswordHandler;
 use App\Http\Telegraph\Handlers\Location\SetLocation;
+use App\Http\Telegraph\Handlers\Location\SetStation;
 use App\Http\Telegraph\Keyboards\StartKeyboard;
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
@@ -54,6 +55,9 @@ class TelegramHandler extends WebhookHandler
                 case 'awaiting_city':
                     Telegraph::message('password')->send();
                     (new SetLocation($userId))->setCity($text->toString());
+                    break;
+                case 'awaiting_station':
+                    (new SetStation($userId))->handle($text->toString());
                     break;
 
 

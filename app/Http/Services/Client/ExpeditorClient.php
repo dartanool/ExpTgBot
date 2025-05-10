@@ -45,11 +45,14 @@ class ExpeditorClient
         Log::debug('API Response', [
 //            'method' => $method,
             'status' => $response->status(),
-//            'headers' => $response->headers(),
+            'headers' => $response->headers(),
             'body' => $response->json()
         ]);
 
-        return $response->json();
+        if ($response->status())
+        {
+            return $response->json();
+        }
     }
 
 }
