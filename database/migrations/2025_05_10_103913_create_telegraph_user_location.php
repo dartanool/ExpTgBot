@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('telegraph_user_location', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->unique();
-            $table->foreign('user_id')->references('user_id')->on('telegraph_users')->onDelete('cascade');
-            $table->integer('city_id')->unique();
-            $table->integer('station_id')->unique();
+            $table->bigInteger('user_id')->unique(); // ID пользователя Telegram
+            $table->string('state')->nullable();     // Текущее состояние (например, 'awaiting_login')
+            $table->text('data')->nullable();        // Дополнительные данные (например, логин)
             $table->timestamps();
         });
     }

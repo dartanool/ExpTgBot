@@ -3,6 +3,7 @@
 namespace App\Http\Services\Client;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class ExpeditorClient
 {
@@ -22,6 +23,13 @@ class ExpeditorClient
             'Content-Type' => 'application/json',
         ])->post($this->baseUrl.$method, $data);
 
+        Log::debug('API Response', [
+//            'method' => $method,
+            'status' => $response->status(),
+//            'headers' => $response->headers(),
+            'body' => $response->json()
+        ]);
+
         return $response->json();
     }
 
@@ -31,6 +39,15 @@ class ExpeditorClient
             'Authorization' => 'Basic '. $this->apiToken,
             'Content-Type' => 'application/json',
         ])->post($this->baseUrl.$method, $data);
+
+
+        // Логирование полного ответа
+        Log::debug('API Response', [
+//            'method' => $method,
+            'status' => $response->status(),
+//            'headers' => $response->headers(),
+            'body' => $response->json()
+        ]);
 
         return $response->json();
     }

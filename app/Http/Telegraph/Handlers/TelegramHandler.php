@@ -4,6 +4,7 @@ namespace App\Http\Telegraph\Handlers;
 
 use App\Http\Telegraph\Handlers\Authorization\SetLoginHandler;
 use App\Http\Telegraph\Handlers\Authorization\SetPasswordHandler;
+use App\Http\Telegraph\Handlers\Location\SetLocation;
 use App\Http\Telegraph\Keyboards\StartKeyboard;
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
@@ -42,27 +43,36 @@ class TelegramHandler extends WebhookHandler
         $userId = $this->message->from()->id();
         $userState = TelegraphUserState::query()->where('user_id', $userId)->first();
 
+        if ($userState){
+            switch ($userState->state) {
+                case 'awaiting_login':
+                    (new SetLoginHandler())->handle($userId, $text->toString());
+                    break;
+                case 'awaiting_password':
+                    (new SetPasswordHandler())->handle($userId, $text->toString());
+                    break;
+                case 'awaiting_city':
+                    Telegraph::message('password')->send();
+                    (new SetLocation($userId))->setCity($text->toString());
+                    break;
+
+
+            }
+        }
+
         switch ($text->toString()) {
             case 'Список заданий':
                 (new GetTaskList($userId))->handle($userId);
                 break;
-        }
-
-        if (!$userState){
-            $this->reply("Нажмите /start");
-            return ;
-        }
-
-        switch ($userState->state) {
-            case 'awaiting_login':
-                (new SetLoginHandler())->handle($userId, $text->toString());
-                break;
-
-            case 'awaiting_password':
-                (new SetPasswordHandler())->handle($userId, $text->toString());
+            case 'Установить станцию' :
+                (new SetLocation($userId))->location();
                 break;
 
         }
+
+
+
+
 
 
     }
