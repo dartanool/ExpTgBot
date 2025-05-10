@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Telegraph\Handlers;
+namespace App\Http\Telegraph\Handlers\Location;
 
 use App\Http\Telegraph\Keyboards\TaskKeyboard;
 use DefStudio\Telegraph\Facades\Telegraph;

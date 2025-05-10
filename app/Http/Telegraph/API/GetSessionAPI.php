@@ -4,14 +4,9 @@ namespace App\Http\Telegraph\API;
 
 use App\Http\Services\Client\ExpeditorClient;
 
-class GetSession
+class GetSessionAPI extends BaseAPI
 {
-    private ExpeditorClient $expeditorClient;
 
-    public function __construct()
-    {
-        $this->expeditorClient = new ExpeditorClient();
-    }
 
     public function handle(string $login, string $password)
     {
@@ -21,7 +16,7 @@ class GetSession
         ];
 
         $method ='GetSession';
-        $response = $this->expeditorClient->send($method, $data);
+        $response = $this->expeditorClient->auth($method, $data);
 
         return $response['Pragma'];
     }

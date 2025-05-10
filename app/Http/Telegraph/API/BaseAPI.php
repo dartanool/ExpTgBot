@@ -4,16 +4,12 @@ namespace App\Http\Telegraph\API;
 
 use App\Http\Services\Client\ExpeditorClient;
 
-class SetUserStation
+class BaseAPI
 {
-    private ExpeditorClient $expeditorClient;
+    protected ExpeditorClient $expeditorClient;
 
     public function __construct()
     {
         $this->expeditorClient = new ExpeditorClient();
-    }
-    public function handle()
-    {
-
     }
 }

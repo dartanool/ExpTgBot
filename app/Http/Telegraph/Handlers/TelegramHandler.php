@@ -42,6 +42,11 @@ class TelegramHandler extends WebhookHandler
         $userId = $this->message->from()->id();
         $userState = TelegramUserState::query()->where('user_id', $userId)->first();
 
+        switch ($text->toString()) {
+            case 'Список заданий':
+                (new GetTaskList($userId))->handle($userId);
+                break;
+        }
 
         if (!$userState){
             $this->reply("Нажмите /start");
@@ -56,7 +61,10 @@ class TelegramHandler extends WebhookHandler
             case 'awaiting_password':
                 (new SetPasswordHandler())->handle($userId, $text->toString());
                 break;
+
         }
+
+
     }
 
 
