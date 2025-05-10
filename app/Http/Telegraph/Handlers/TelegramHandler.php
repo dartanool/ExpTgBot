@@ -5,7 +5,7 @@ namespace App\Http\Telegraph\Handlers;
 use App\Http\Telegraph\Handlers\Authorization\SetLoginHandler;
 use App\Http\Telegraph\Handlers\Authorization\SetPasswordHandler;
 use App\Http\Telegraph\Keyboards\StartKeyboard;
-use App\Models\Telegraph\TelegramUserState;
+use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use DefStudio\Telegraph\Keyboard\Button;
@@ -27,7 +27,7 @@ class TelegramHandler extends WebhookHandler
     {
         $userId = $this->chat->chat_id;
 
-        TelegramUserState::query()->updateOrCreate(
+        TelegraphUserState::query()->updateOrCreate(
             ['user_id' => $userId],
             ['state' => 'awaiting_login', 'data' => null]
         );
@@ -40,7 +40,7 @@ class TelegramHandler extends WebhookHandler
     {
 
         $userId = $this->message->from()->id();
-        $userState = TelegramUserState::query()->where('user_id', $userId)->first();
+        $userState = TelegraphUserState::query()->where('user_id', $userId)->first();
 
         switch ($text->toString()) {
             case 'Список заданий':

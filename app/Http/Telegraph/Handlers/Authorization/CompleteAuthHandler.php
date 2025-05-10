@@ -3,7 +3,7 @@
 namespace App\Http\Telegraph\Handlers\Authorization;
 use App\Http\Telegraph\API\GetSessionAPI;
 use App\Http\Telegraph\Handlers\Location\SetUserStation;
-use App\Models\Telegraph\TelegramUserState;
+use App\Models\Telegraph\TelegraphUserState;
 use App\Models\Telegraph\TelegraphUsers;
 use DefStudio\Telegraph\Facades\Telegraph;
 
@@ -26,7 +26,7 @@ class CompleteAuthHandler
                 ['token' => $token]
             );
 
-            TelegramUserState::where('user_id', $userId)->delete();
+            TelegraphUserState::where('user_id', $userId)->delete();
         }
     }
 }

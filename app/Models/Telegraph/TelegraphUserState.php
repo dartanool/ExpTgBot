@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $state
  * @property string $data
  */
-class TelegramUserState extends Model
+class TelegraphUserState extends Model
 {
     protected $fillable = ['user_id', 'state', 'data'];
 }
