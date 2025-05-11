@@ -19,8 +19,6 @@ class CompleteAuthHandler
             Telegraph::message("$token")->send();
 
 
-            (new SetUserStation())->handle();
-
             TelegraphUsers::updateOrCreate(
                 ['user_id' => $userId],
                 ['token' => $token]

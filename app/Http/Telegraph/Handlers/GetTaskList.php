@@ -3,7 +3,8 @@
 namespace App\Http\Telegraph\Handlers;
 
 use App\Http\Services\TelegraphService;
-use DefStudio\Telegraph\Telegraph;
+use App\Http\Telegraph\Keyboards\TaskListKeyboard;
+use \DefStudio\Telegraph\Facades\Telegraph;
 use \App\Http\Telegraph\API\GetTaskListAPI;
 
 class GetTaskList
@@ -18,15 +19,19 @@ class GetTaskList
     }
     public function handle(int $userId)
     {
-        $text = 'Вот ваш список';
-        $this->telegraphService->sendMessage($text);
 
         $response = $this->getTaskListAPI->handle($userId);
+
+
+        Telegraph::message('Вот ваш список')->keyboard(TaskListKeyboard::handle($response->tasks)) ->send();
+
+
+
 
 //        if (isset($response)) {
 //            $this->telegraphService->sendMessage('lf');
 //        }
 //        $this->telegraphService->sendMessage('no');
-        $this->telegraphService->sendApiResponse($response);
+//        $this->telegraphService->sendApiResponse($response);
     }
 }

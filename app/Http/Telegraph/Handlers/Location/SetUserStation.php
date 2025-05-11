@@ -13,6 +13,6 @@ class SetUserStation
         $setStation = new SetUserStationAPI();
         $setStation->handle($userId, $stationId);
 
-        Telegraph::message("На какой станции вы находитесь")->replyKeyboard(TaskKeyboard::handle())->send();
+        Telegraph::message("успешно");
     }
 }
