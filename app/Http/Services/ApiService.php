@@ -22,10 +22,10 @@ class ApiService
 
     public function parseApiResponse(array $apiResponse): GetTasksListDTO
     {
-        $tasks = [];
+        $trips = [];
 
         foreach ($apiResponse['result'] as $taskData) {
-            $tasks[] = new GetTaskDTO(
+            $trips[] = new GetTaskDTO(
                 id: $taskData['ID_AEX_TRIP'],
                 trsId: $taskData['AEX_TRIP_ID_TRS'],
                 carNumber: $taskData['TRS_SID'],
@@ -47,7 +47,19 @@ class ApiService
 
         return new GetTasksListDTO(
             success: $apiResponse['result'] === '1',
-            tasks: $tasks,
+            trips: $trips,
         );
+    }
+
+
+    public function getTripById(string $tripId, array $trips): GetTaskDTO
+    {
+        foreach ($trips as $trip) {
+            if ($trip->id === $tripId) {
+                return $trip;
+            }
+        }
+
+        throw new \Exception("Задание не найдено");
     }
 }

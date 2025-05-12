@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('telegraph_user_location', function (Blueprint $table) {
+        Schema::create('telegraph_user_locations', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('user_id')->unique(); // ID пользователя Telegram
-            $table->string('state')->nullable();     // Текущее состояние (например, 'awaiting_login')
-            $table->text('data')->nullable();        // Дополнительные данные (например, логин)
+
+            $table->foreignId('user_id')->references('user_id')->on('telegraph_users')->onDelete('cascade');;
+            $table->integer('city_id')->nullable();
+            $table->string('station_id')->nullable();
             $table->timestamps();
         });
     }

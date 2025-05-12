@@ -9,12 +9,11 @@ use App\Models\Telegraph\TelegraphUserState;
 class GetStationIdAPI extends BaseApi
 {
 
-    public function handle(int $userId, string $station)
+    public function handle(int $userId, string $station, string $cityId)
     {
         $token = TelegraphUsers::query()->where('user_id', $userId)->first()->token;
         $method = 'rt';
 
-        $cityId = TelegraphUserState::query()->where('user_id', $userId)->first();
 
         $data = [
             'Pragma' => "$token",
@@ -23,7 +22,7 @@ class GetStationIdAPI extends BaseApi
                 'report' => 'te.mst.r'
             ],
             'params' => [
-                'idKg' => $cityId->data,
+                'idKg' => $cityId,
                 'mstName' => "{$station}%"
             ]
         ];

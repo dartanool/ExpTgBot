@@ -23,7 +23,7 @@ class GetTaskList
         $response = $this->getTaskListAPI->handle($userId);
 
 
-        Telegraph::message('Вот ваш список')->keyboard(TaskListKeyboard::handle($response->tasks)) ->send();
+        Telegraph::message('Вот ваш список')->keyboard(TaskListKeyboard::handle($response->trips)) ->send();
 
 
 
