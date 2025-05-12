@@ -48,7 +48,7 @@ class TelegramHandler extends WebhookHandler
         $userId = $this->chat->chat_id;
 
         $tripId = $this->data->get('tripId');
-        $apiService = new ExpeditorApiService();
+        $apiService = new ExpeditorApiService($userId);
         $getTaskListAPI = new GetTaskListAPI();
 
 

@@ -12,6 +12,6 @@ class SetPasswordHandler
 
         $data = TelegraphUserState::query()->where('user_id', $userId)->first();
 
-        (new CompleteAuthHandler())->handle($userId, $data->data, $password);
+        (new CompleteAuthHandler($userId))->handle($data->data, $password);
     }
 }

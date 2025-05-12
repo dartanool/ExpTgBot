@@ -2,16 +2,22 @@
 
 namespace App\Http\Telegraph\Handlers\Location;
 
-use App\Http\Telegraph\API\Location\SetUserStationAPI;
-use App\Http\Telegraph\Keyboards\TaskKeyboard;
+use App\Http\Services\ExpeditorApiService;
 use DefStudio\Telegraph\Facades\Telegraph;
 
 class SetUserStation
 {
-    public function handle(int $userId, string $stationId)
+    private int $chatId;
+    private ExpeditorApiService $expeditorApiService;
+
+    public function __construct(int $chatId)
     {
-        $setStation = new SetUserStationAPI();
-        $setStation->handle($userId, $stationId);
+        $this->chatId = $chatId;
+        $this->expeditorApiService = new ExpeditorApiService($chatId);
+    }
+    public function handle( string $stationId)
+    {
+        $this->expeditorApiService->setUserStation($this->chatId, $stationId);
 
         Telegraph::message("успешно");
     }

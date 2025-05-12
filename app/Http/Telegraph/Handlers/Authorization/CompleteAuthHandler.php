@@ -1,20 +1,24 @@
 <?php
 
 namespace App\Http\Telegraph\Handlers\Authorization;
-use App\Http\Telegraph\API\GetSessionAPI;
-use App\Http\Telegraph\Handlers\Location\SetUserStation;
+use App\Http\Services\ExpeditorApiService;
 use App\Http\Telegraph\Keyboards\TaskKeyboard;
-use App\Http\Telegraph\Keyboards\TaskListKeyboard;
 use App\Models\Telegraph\TelegraphUserState;
 use App\Models\Telegraph\TelegraphUsers;
 use DefStudio\Telegraph\Facades\Telegraph;
 
 class CompleteAuthHandler
 {
-    public function handle(int $userId, string $login, string $password): void
+    private ExpeditorApiService $expeditorApiService;
+    private int $chatId;
+    public function __construct(int $chatId)
     {
-        $getSession = new GetSessionAPI();
-        $token = $getSession->handle($login, $password);
+        $this->chatId = $chatId;
+        $this->expeditorApiService = new ExpeditorApiService($chatId);
+    }
+    public function handle(string $login, string $password): void
+    {
+        $token = $this->expeditorApiService->getSession($login, $password);
 
         if ($token) {
             Telegraph::message("Вы успешно авторизовались")->replyKeyboard(TaskKeyboard::handle())->send();
@@ -22,11 +26,11 @@ class CompleteAuthHandler
 
 
             TelegraphUsers::updateOrCreate(
-                ['user_id' => $userId],
+                ['user_id' => $this->chatId],
                 ['token' => $token]
             );
 
-            TelegraphUserState::where('user_id', $userId)->delete();
+            TelegraphUserState::where('user_id', $this->chatId)->delete();
         }
     }
 }

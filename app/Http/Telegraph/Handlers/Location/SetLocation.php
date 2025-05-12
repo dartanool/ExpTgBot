@@ -2,22 +2,20 @@
 
 namespace App\Http\Telegraph\Handlers\Location;
 
-use App\Http\Services\TelegraphService;
-use App\Http\Telegraph\API\GetSessionAPI;
-use App\Http\Telegraph\API\GetTaskListAPI;
-use App\Http\Telegraph\API\Location\GetCityIdAPI;
-use App\Models\Telegraph\TelegraphUsers;
+use App\Http\Services\ExpeditorApiService;
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
 
 class SetLocation
 {
-    private TelegraphService $telegraphService;
     private int $chatId;
+    private ExpeditorApiService $expeditorApiService;
+
 
     public function __construct(int $chatId)
     {
-        $this->telegraphService = new TelegraphService($chatId);
+
+        $this->expeditorApiService = new ExpeditorApiService($chatId);
         $this->chatId = $chatId;
     }
     public function location()
@@ -31,8 +29,7 @@ class SetLocation
 
     public function setCity(string $city)
     {
-        $getCityId = new GetCityIdAPI();
-        $cityId = $getCityId->handle($this->chatId, $city);
+        $cityId = $this->expeditorApiService->getCityId($this->chatId, $city);
 
         if ($cityId) {
             TelegraphUserState::query()->updateOrCreate(

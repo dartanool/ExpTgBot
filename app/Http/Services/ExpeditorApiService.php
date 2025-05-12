@@ -4,21 +4,25 @@ namespace App\Http\Services;
 
 use App\DTO\GetTaskDTO;
 use App\DTO\GetTasksListDTO;
-use App\Http\Telegraph\API\GetTaskListAPI;
+use App\Http\Services\Client\ExpeditorClient;
+use App\Models\Telegraph\TelegraphUsers;
 use Illuminate\Support\Collection;
 
 class ExpeditorApiService
 {
 
-    public function getCityId(array $response): int
+    protected ExpeditorClient $expeditorClient;
+    private string $token;
+
+    public function __construct(int $userId)
     {
-        return (int) ($response['result'][0]['ID_KG'] ?? 0);
+        $this->expeditorClient = new ExpeditorClient();
+
+        $this->token = TelegraphUsers::query()->where('user_id', $userId)->first()->token;
     }
 
-    public function getStationId(array $response): int
-    {
-        return (int) ($response['result'][0]['ID_MST'] ?? 0);
-    }
+
+
 
     public function parseApiResponse(array $apiResponse): GetTasksListDTO
     {
@@ -62,4 +66,92 @@ class ExpeditorApiService
 
         throw new \Exception("Задание не найдено");
     }
+
+
+    public function getSession(string $login, string $password)
+    {
+        $data = [
+            'Username' => $login,
+            'Password' => $password
+        ];
+
+        $method ='GetSession';
+        $response = $this->expeditorClient->auth($method, $data);
+
+        return $response['Pragma'];
+    }
+
+    public function getCityId(int $userId, string $city)
+    {
+        $method = 'rt';
+
+        $data = [
+            'Pragma' => "$this->token",
+            'init' => [
+                'type' => 'data',
+                'report' => 'te.kg.r'
+            ],
+            'params' => [
+                'KgName' => "{$city}%"
+            ]
+        ];
+
+        $response = $this->expeditorClient->send($method, $data);
+
+        return (int) ($response['result'][0]['ID_KG'] ?? 0);
+
+    }
+
+    public function getStationId(int $userId, string $station, string $cityId)
+    {
+        $method = 'rt';
+
+
+        $data = [
+            'Pragma' => "$this->token",
+            'init' => [
+                'type' => 'data',
+                'report' => 'te.mst.r'
+            ],
+            'params' => [
+                'idKg' => $cityId,
+                'mstName' => "{$station}%"
+            ]
+        ];
+
+        $response = $this->expeditorClient->send($method, $data);
+
+        return (int) ($response['result'][0]['ID_MST'] ?? 0);
+
+    }
+
+    public function setUserStation(int $userId, int $stationId)
+    {
+        $method = 'SetUserMst';
+
+        $data = [
+            'Pragma' => "$this->token",
+            'mst' => "$stationId"
+        ];
+
+        $this->expeditorClient->send($method, $data);
+    }
+
+    public function getTaskList(int $userId) : GetTasksListDTO
+    {
+        $method = 'rt';
+
+        $data = [
+            'Pragma' => "$this->token ",
+            'init' => [
+                'type' => 'data',
+                'report' => 'te.trips.r'
+            ]
+        ];
+
+        $response = $this->expeditorClient->send($method, $data);
+
+        return $this->parseApiResponse($response);
+    }
+
 }
