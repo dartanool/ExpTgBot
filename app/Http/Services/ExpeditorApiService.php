@@ -28,24 +28,24 @@ class ExpeditorApiService
     {
         $trips = [];
 
-        foreach ($apiResponse['result'] as $taskData) {
+        foreach ($apiResponse['result'] as $tripData) {
             $trips[] = new GetTaskDTO(
-                id: $taskData['ID_AEX_TRIP'],
-                trsId: $taskData['AEX_TRIP_ID_TRS'],
-                carNumber: $taskData['TRS_SID'],
-                startDate: $taskData['AEX_TRIP_DT_BG'],
-                endDate: $taskData['AEX_TRIP_DT_END'],
-                cityId: $taskData['ID_KG'],
-                cityName: $taskData['KG_NAME'],
-                totalTasks: (int)$taskData['Z_CNT'],
-                deliveryTasksCount: (int)$taskData['Z_DST_CNT'],
-                pickupTasksCount: (int)$taskData['Z_ZBR_CNT'],
-                deliveryWeight: (float)str_replace(',', '.', $taskData['Z_DST_VES']),
-                pickupWeight: (float)str_replace(',', '.', $taskData['Z_ZBR_VES']),
-                deliveryVolume: (float)str_replace(',', '.', $taskData['Z_DST_OBYOM']),
-                pickupVolume: (float)str_replace(',', '.', $taskData['Z_ZBR_OBYOM']),
-                statusReady: (int)$taskData['S71'],
-                statusCompleted: (int)$taskData['S48'],
+                id: $tripData['ID_AEX_TRIP'],
+                trsId: $tripData['AEX_TRIP_ID_TRS'],
+                carNumber: $tripData['TRS_SID'],
+                startDate: $tripData['AEX_TRIP_DT_BG'],
+                endDate: $tripData['AEX_TRIP_DT_END'],
+                cityId: $tripData['ID_KG'],
+                cityName: $tripData['KG_NAME'],
+                totalTasks: (int)$tripData['Z_CNT'],
+                deliveryTasksCount: (int)$tripData['Z_DST_CNT'],
+                pickupTasksCount: (int)$tripData['Z_ZBR_CNT'],
+                deliveryWeight: (float)str_replace(',', '.', $tripData['Z_DST_VES']),
+                pickupWeight: (float)str_replace(',', '.', $tripData['Z_ZBR_VES']),
+                deliveryVolume: (float)str_replace(',', '.', $tripData['Z_DST_OBYOM']),
+                pickupVolume: (float)str_replace(',', '.', $tripData['Z_ZBR_OBYOM']),
+                statusReady: (int)$tripData['S71'],
+                statusCompleted: (int)$tripData['S48'],
             );
         }
 
@@ -152,6 +152,61 @@ class ExpeditorApiService
         $response = $this->expeditorClient->send($method, $data);
 
         return $this->parseApiResponse($response);
+    }
+
+    public function completeAcceptation(string $tripId)
+    {
+        $method = 'rt';
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.event.w"
+            ],
+            "params" => [
+                "eventCode" => "st.2.72.0",
+                "eventIdTrip" => $tripId,
+            ]
+        ];
+
+        return $this->expeditorClient->send($method, $data);
+    }
+
+    public function cancelEvent(string $tripId)
+    {
+        $method = 'rt';
+
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.eventDel.w"
+            ],
+            "params" => [
+                "eventId" =>  $tripId
+            ]
+        ];
+
+        return $this->expeditorClient->send($method, $data);
+    }
+
+    public function finishAcceptation(string $tripId)
+    {
+        $method = 'rt';
+
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.eventDel.w"
+            ],
+            "params" => [
+                "eventCode" => "st.1.76.2",
+                "eventId" =>  $tripId,
+            ]
+        ];
+
+        return $this->expeditorClient->send($method, $data);
     }
 
 }

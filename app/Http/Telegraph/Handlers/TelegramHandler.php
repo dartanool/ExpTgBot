@@ -2,21 +2,14 @@
 
 namespace App\Http\Telegraph\Handlers;
 
-use App\DTO\GetTaskDTO;
-use App\Http\Services\ExpeditorApiService;
-use App\Http\Telegraph\API\GetTaskListAPI;
-use App\Http\Telegraph\API\WareHouse;
 use App\Http\Telegraph\Handlers\Authorization\SetLoginHandler;
 use App\Http\Telegraph\Handlers\Authorization\SetPasswordHandler;
 use App\Http\Telegraph\Handlers\Location\SetLocation;
 use App\Http\Telegraph\Handlers\Location\SetStation;
 use App\Http\Telegraph\Keyboards\StartKeyboard;
-use App\Http\Telegraph\Keyboards\TaskListKeyboard;
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
-use DefStudio\Telegraph\Keyboard\Button;
-use DefStudio\Telegraph\Keyboard\Keyboard;
 use Illuminate\Support\Stringable;
 
 
@@ -52,11 +45,31 @@ class TelegramHandler extends WebhookHandler
 
     }
 
-    public function completeTrip()
+    public function selectTripWareHouse()
     {
-        $tripId = $this->data->get('tripId');
-        // Логика подтверждения выполнения...
-        $this->chat->message("✅ Задание #{$tripId} отмечено как выполненное")->send();
+        $userId = $this->chat->chat_id;
+
+        (new WarehouseAcceptance($userId))->selectTripWareHouse($this->data->get('tripId'));
+
+    }
+
+    public function completeAcceptation()
+    {
+        $userId = $this->chat->chat_id;
+        (new WarehouseAcceptance($userId))->completeAcceptation($this->data->get('tripId'));
+    }
+
+    public function cancelEvent()
+    {
+        $userId = $this->chat->chat_id;
+        (new WarehouseAcceptance($userId))->cancelEvent($this->data->get('tripId'));
+    }
+
+    public function finishAcceptation()
+    {
+        $userId = $this->chat->chat_id;
+        (new WarehouseAcceptance($userId))->finishAcceptation($this->data->get('tripId'));
+
     }
 
     public function arriveTrip()
@@ -111,7 +124,7 @@ class TelegramHandler extends WebhookHandler
                 (new SetLocation($userId))->location();
                 break;
             case 'Приём со склада' :
-                (new WareHouse())->handle($userId);
+                (new WarehouseAcceptance($userId))->handle();
                 break;
 
         }

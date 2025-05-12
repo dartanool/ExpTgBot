@@ -9,7 +9,7 @@ use DefStudio\Telegraph\Keyboard\Keyboard;
 class TaskListKeyboard
 {
 
-    public static function handle(array $trips)
+    public static function show(array $trips)
     {
         $keyboard = Keyboard::make();
 
@@ -31,12 +31,34 @@ class TaskListKeyboard
 
         return $keyboard;
     }
+    public static function handle(array $trips)
+    {
+        $keyboard = Keyboard::make();
+
+        foreach($trips as $trip) {
+            $buttonText = sprintf(
+                "🚛 %s | %s-%s | %s",
+                $trip->carNumber,
+                date('H:i', strtotime($trip->startDate)),
+                date('H:i', strtotime($trip->endDate)),
+                $trip->cityName);
+
+            $keyboard->button($buttonText)
+                ->action('selectTripWareHouse')
+                ->param('tripId', $trip->id);
+        }
+
+        // Добавляем кнопку "Отмена"
+        $keyboard->button('❌ Отмена')->action('cancel_trips');
+
+        return $keyboard;
+    }
 
     public static function createDetailsKeyboard(GetTaskDTO $trip): Keyboard
     {
         return Keyboard::make()
-            ->button('✅ Подтвердить выполнение')->action('completeTrip')->param('tripId', $trip->id)
-            ->button('📍 Отметить прибытие')->action('arriveTrip')->param('tripId', $trip->id)
-            ->button('🔙 Назад к списку')->action('showTripsList');
+            ->button('✅ Груз погружен')->action('completeAcceptation')->param('tripId', $trip->id)
+            ->button('📍 Отмена события')->action('cancelEvent')->param('tripId', $trip->id)
+            ->button('🔙 Окончил приём')->action('finishAcceptation')->param('tripId', $trip->id)    ;
     }
 }
