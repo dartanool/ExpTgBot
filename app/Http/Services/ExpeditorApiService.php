@@ -7,7 +7,7 @@ use App\DTO\GetTasksListDTO;
 use App\Http\Telegraph\API\GetTaskListAPI;
 use Illuminate\Support\Collection;
 
-class ApiService
+class ExpeditorApiService
 {
 
     public function getCityId(array $response): int

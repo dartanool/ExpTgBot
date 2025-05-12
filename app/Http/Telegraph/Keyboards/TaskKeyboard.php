@@ -12,6 +12,7 @@ class TaskKeyboard
         return ReplyKeyboard::make()->buttons([
             ReplyButton::make('Установить станцию'),
             ReplyButton::make('Список заданий'),
+            ReplyButton::make('Приём со склада'),
             ReplyButton::make('Выполнить заданий'),
             ReplyButton::make('Завершить заданий '),
             ]);

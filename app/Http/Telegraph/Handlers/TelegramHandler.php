@@ -3,8 +3,9 @@
 namespace App\Http\Telegraph\Handlers;
 
 use App\DTO\GetTaskDTO;
-use App\Http\Services\ApiService;
+use App\Http\Services\ExpeditorApiService;
 use App\Http\Telegraph\API\GetTaskListAPI;
+use App\Http\Telegraph\API\WareHouse;
 use App\Http\Telegraph\Handlers\Authorization\SetLoginHandler;
 use App\Http\Telegraph\Handlers\Authorization\SetPasswordHandler;
 use App\Http\Telegraph\Handlers\Location\SetLocation;
@@ -47,7 +48,7 @@ class TelegramHandler extends WebhookHandler
         $userId = $this->chat->chat_id;
 
         $tripId = $this->data->get('tripId');
-        $apiService = new ApiService();
+        $apiService = new ExpeditorApiService();
         $getTaskListAPI = new GetTaskListAPI();
 
 
@@ -85,7 +86,7 @@ class TelegramHandler extends WebhookHandler
         $userId = $this->chat->chat_id;
 
         // Возвращаем пользователю исходный список
-        (new GetTaskList($userId))->handle($userId);
+        (new GetTaskList($userId))->handle();
     }
 
 
@@ -119,10 +120,13 @@ class TelegramHandler extends WebhookHandler
 
         switch ($text->toString()) {
             case 'Список заданий':
-                (new GetTaskList($userId))->handle($userId);
+                (new GetTaskList($userId))->handle();
                 break;
             case 'Установить станцию' :
                 (new SetLocation($userId))->location();
+                break;
+            case 'Приём со склада' :
+                (new WareHouse())->handle($userId);
                 break;
 
         }

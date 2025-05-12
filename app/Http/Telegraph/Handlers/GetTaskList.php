@@ -11,16 +11,18 @@ class GetTaskList
 {
     private TelegraphService $telegraphService;
     private GetTaskListAPI $getTaskListAPI;
+    private int $userId;
 
     public function __construct(int $chatId)
     {
         $this->telegraphService = new TelegraphService($chatId);
         $this->getTaskListAPI = new GetTaskListAPI();
+        $this->userId = $chatId;
     }
-    public function handle(int $userId)
+    public function handle()
     {
 
-        $response = $this->getTaskListAPI->handle($userId);
+        $response = $this->getTaskListAPI->handle($this->userId);
 
 
         Telegraph::message('Вот ваш список')->keyboard(TaskListKeyboard::handle($response->trips)) ->send();
