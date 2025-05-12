@@ -2,7 +2,7 @@
 
 namespace App\Http\Telegraph\Handlers\Authorization;
 use App\Http\Services\ExpeditorApiService;
-use App\Http\Telegraph\Keyboards\TaskKeyboard;
+use App\Http\Telegraph\Keyboards\MainKeyboard;
 use App\Models\Telegraph\TelegraphUserState;
 use App\Models\Telegraph\TelegraphUsers;
 use DefStudio\Telegraph\Facades\Telegraph;
@@ -21,7 +21,7 @@ class CompleteAuthHandler
         $token = $this->expeditorApiService->getSession($login, $password);
 
         if ($token) {
-            Telegraph::message("Вы успешно авторизовались")->replyKeyboard(TaskKeyboard::handle())->send();
+            Telegraph::message("Вы успешно авторизовались")->replyKeyboard(MainKeyboard::handle())->send();
             Telegraph::message("$token")->send();
 
 

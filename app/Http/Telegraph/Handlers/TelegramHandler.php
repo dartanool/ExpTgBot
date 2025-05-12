@@ -43,28 +43,13 @@ class TelegramHandler extends WebhookHandler
 
     }
 
+
     public function selectTrip()
     {
         $userId = $this->chat->chat_id;
 
-        $tripId = $this->data->get('tripId');
-        $apiService = new ExpeditorApiService($userId);
-        $getTaskListAPI = new GetTaskListAPI();
+        (new GetTaskList($userId))->selectTrip($this->data->get('tripId'));
 
-
-        $response = $getTaskListAPI->handle($userId);
-
-
-        // Получаем данные задания (может быть из кэша или нового API-запроса)
-        $trip = $apiService->getTripById($tripId, $response->trips);
-
-        // Форматируем сообщение с деталями
-        $message = $this->formatTripDetails($trip);
-
-        // Отправляем сообщение с новой клавиатурой
-        $this->chat->message($message)
-            ->keyboard(TaskListKeyboard::createDetailsKeyboard($trip))
-            ->send();
     }
 
     public function completeTrip()
@@ -135,31 +120,8 @@ class TelegramHandler extends WebhookHandler
 
 
 
-    private function formatTripDetails(GetTaskDTO $trip): string
-    {
-        return <<<TEXT
-        🚛 *Детали задания #{$trip->id}*
 
-        *Машина:* {$trip->carNumber}
-        *Город:* {$trip->cityName}
-        *Время:* {$trip->startDate} - {$trip->endDate}
 
-        *Статистика:*
-        - Всего поручений: {$trip->totalTasks}
-        - Доставка: {$trip->deliveryTasksCount} (Вес: {$trip->deliveryWeight} кг)
-        - Забор: {$trip->pickupTasksCount} (Вес: {$trip->pickupWeight} кг)
 
-        *Статус:* {$this->getStatusText($trip)}
-        TEXT;
-    }
-
-    private function getStatusText(GetTaskDTO $trip): string
-    {
-        return match($trip->statusReady) {
-            1 => 'Готов к выполнению',
-            2 => 'Завершено',
-            default => 'Запланировано',
-        };
-    }
 
 }

@@ -5,7 +5,7 @@ namespace App\Http\Telegraph\Keyboards;
 use DefStudio\Telegraph\Keyboard\ReplyButton;
 use DefStudio\Telegraph\Keyboard\ReplyKeyboard;
 
-class TaskKeyboard
+class MainKeyboard
 {
     public static function handle(): ReplyKeyboard
     {
