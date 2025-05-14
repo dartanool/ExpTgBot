@@ -98,11 +98,29 @@ class TelegramHandler extends WebhookHandler
     public function selectAddress()
     {
         $userId = $this->chat->chat_id;
-        (new CompleteTask($userId))->selectAddress($this->data->get('id'),$this->data->get('tripId'));
+        (new CompleteTask($userId))->selectAddress($this->data->get('addressId'),$this->data->get('tripId'));
     }
 
-
-
+    public function arrivedToAddress()
+    {
+        $userId = $this->chat->chat_id;
+        (new CompleteTask($userId))->arrivedToAddress($this->data->get('addressId'),$this->data->get('tripId'));
+    }
+    public function leftAtTheAddress()
+    {
+        $userId = $this->chat->chat_id;
+        (new CompleteTask($userId))->leftAtTheAddress($this->data->get('addressId'),$this->data->get('tripId'));
+    }
+    public function getClientList()
+    {
+        $userId = $this->chat->chat_id;
+        (new CompleteTask($userId))->getClientListByAddress($this->data->get('addressId'),$this->data->get('tripId'));
+    }
+    public function selectClient()
+    {
+        $userId = $this->chat->chat_id;
+        (new CompleteTask($userId))->selectClient($this->data->get('clientId'),$this->data->get('tripId'),$this->data->get('addressId') );
+    }
 
 
     public function handleChatMessage(Stringable $text): void

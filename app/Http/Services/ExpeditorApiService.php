@@ -4,6 +4,8 @@ namespace App\Http\Services;
 
 use App\DTO\GetAddressDTO;
 use App\DTO\GetAddressListDTO;
+use App\DTO\GetClientDTO;
+use App\DTO\GetClientListDTO;
 use App\DTO\GetTaskDTO;
 use App\DTO\GetTasksListDTO;
 use App\Http\Services\Client\ExpeditorClient;
@@ -71,7 +73,6 @@ class ExpeditorApiService
                 lon: (float)str_replace(',', '.', $item['AEXO_ADR_LON']),
                 workHours: $item['AEXO_TWORK_STOR'],
                 clientName: $item['ADDR_CLIENT']
-
             );
             $count++;
 
@@ -80,6 +81,26 @@ class ExpeditorApiService
         return new GetAddressListDTO(
             success: $apiResponse['result'] === '1',
             addresses: $addresses,
+        );
+    }
+
+    public function parseClientApiResponse(array $apiResponse): GetClientListDTO
+    {
+        $clients = [];
+        $count = 0;
+        foreach ($apiResponse['result'] as $item) {
+            $clients[] = new GetClientDTO(
+                id : $count,
+                clientName: $item['CLIENT'],
+                count: $item['CNT'],
+                type: $item['TIP_NAME'],
+            );
+            $count++;
+        }
+
+        return new GetClientListDTO(
+            success: $apiResponse['result'] === '1',
+            clients: $clients,
         );
     }
 
@@ -100,8 +121,20 @@ class ExpeditorApiService
             if ($address->id === $addressId)
                 return $address;
         }
-        throw new \Exception("Address не найдено");
+        throw new \Exception(" Address не найдено");
 
+    }
+
+    public function getClientById(string $clientId, array $clients) :GetClientDTO
+    {
+        Telegraph::message("$clientId")->send();
+        foreach ($clients as $client){
+            if ($client->id === $clientId)
+                Telegraph::message("$client->id")->send();
+
+                return $client;
+        }
+        throw new \Exception(" Address не найдено");
     }
 
 
@@ -256,4 +289,60 @@ class ExpeditorApiService
         return $this->parseAddressApiResponse($response);
     }
 
+    public function arrivedToAddress(string $tripId, string $address)
+    {
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.event.w"
+            ],
+            "params" => [
+                "eventCode" => "st.2.56.0",
+                "eventIdTrip" =>  $tripId,
+                "eventLat" => 1,
+                "eventLon" => 1,
+                "eventAddr" => $address
+            ]
+        ];
+
+        $response = $this->expeditorClient->send($this->method, $data);
+    }
+    public function leftAtTheAddress(string $tripId, string $address)
+    {
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.event.w"
+            ],
+            "params" => [
+                "eventCode" => "st.2.57.0",
+                "eventIdTrip" =>  $tripId,
+                "eventLat" => 1,
+                "eventLon" => 1,
+                "eventAddr" => $address
+            ]
+        ];
+
+        $response = $this->expeditorClient->send($this->method, $data);
+    }
+    public function getClientList(string $tripId, string $address)
+    {
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.addrClientList.r"
+            ],
+            "params" => [
+                "idTrip" =>  $tripId,
+                "Addr" => $address
+            ]
+        ];
+
+        $response = $this->expeditorClient->send($this->method, $data);
+
+        return $this->parseClientApiResponse($response);
+    }
 }

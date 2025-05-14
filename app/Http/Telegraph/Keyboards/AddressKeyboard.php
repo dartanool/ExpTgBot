@@ -2,6 +2,8 @@
 
 namespace App\Http\Telegraph\Keyboards;
 
+use App\DTO\GetAddressDTO;
+use App\DTO\GetTaskDTO;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Keyboard\Keyboard;
 
@@ -20,7 +22,7 @@ class AddressKeyboard
 
             $keyboard->button($buttonText)
                 ->action('selectAddress')
-                ->param('id', $address->id)
+                ->param('addressId', $address->id)
                 ->param('tripId', $tripId);
         }
 
@@ -28,6 +30,14 @@ class AddressKeyboard
         $keyboard->button('❌ Отмена')->action('cancel_trips');
 
         return $keyboard;
+    }
+
+    public static function createDetailsKeyboard(GetAddressDTO $address, string $tripId): Keyboard
+    {
+        return Keyboard::make()
+            ->button('✅Прибыл по адресу')->action('arrivedToAddress')->param('addressId', $address->id)->param('tripId', $tripId)
+            ->button('✅Убыл по адресу')->action('leftAtTheAddress')->param('addressId', $address->id)->param('tripId', $tripId)
+            ->button('✅Список клиентов по указанному адресу')->action('getClientList')->param('addressId', $address->id)->param('tripId', $tripId);
     }
 
 }

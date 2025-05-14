@@ -3,9 +3,11 @@
 namespace App\Http\Telegraph\Handlers;
 
 use App\DTO\GetAddressDTO;
+use App\DTO\GetClientDTO;
 use App\DTO\GetTaskDTO;
 use App\Http\Services\ExpeditorApiService;
 use App\Http\Telegraph\Keyboards\AddressKeyboard;
+use App\Http\Telegraph\Keyboards\ClientKeyboard;
 use App\Http\Telegraph\Keyboards\CompleteTaskKeyboard;
 use App\Http\Telegraph\Keyboards\TaskListKeyboard;
 use DefStudio\Telegraph\Facades\Telegraph;
@@ -46,15 +48,56 @@ class CompleteTask
     }
 
 
+    /**
+     * @throws \Exception
+     */
     public function selectAddress(string $addressId, string $tripId)
+    {
+        $response = $this->expeditorApiService->getAddressList($tripId);
+        $address = $this->expeditorApiService->getAddressById($addressId, $response->addresses);
+
+        Telegraph::message($this->sendAddressCard($address))->keyboard(AddressKeyboard::createDetailsKeyboard($address, $tripId))->send();
+
+
+    }
+    public function arrivedToAddress(string $addressId, string $tripId)
     {
         $addresses = $this->expeditorApiService->getAddressList($tripId);
         $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
 
-        Telegraph::message($this->sendAddressCard($address))->send();
+        $this->expeditorApiService->arrivedToAddress($tripId, $address->address);
+    }
+    public function leftAtTheAddress(string $addressId, string $tripId)
+    {
+        $addresses = $this->expeditorApiService->getAddressList($tripId);
+        $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
 
+        $this->expeditorApiService->leftAtTheAddress($tripId, $address->address);
+    }
+    public function getClientListByAddress(string $addressId, string $tripId)
+    {
+        $addresses = $this->expeditorApiService->getAddressList($tripId);
+        $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
+
+        $clientList = $this->expeditorApiService->getClientList($tripId, $address->address);
+        Telegraph::message('Список клиентов по данному адресу')->keyboard(ClientKeyboard::show($clientList->clients, $tripId, $addressId))->send();
+//        Telegraph::message('Список клиентов по данному адресу')->keyboard(ClientKeyboard::show($clientList->clients, $tripId, $addressId))->send();
 
     }
+
+    public function selectClient(string $clientId, string $tripId, string $addressId)
+    {
+        $addresses = $this->expeditorApiService->getAddressList($tripId);
+        $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
+        $clients = $this->expeditorApiService->getClientList($tripId, $address->address);
+
+        $client = $this->expeditorApiService->getClientById($clientId, $clients->clients);
+        Telegraph::message("{$client->clientName}")->send();
+        Telegraph::message($this->sendClientCard($client))->send();
+    }
+
+
+
     private function formatTripDetails(GetTaskDTO $trip): string
     {
         return <<<TEXT
@@ -88,6 +131,14 @@ class CompleteTask
             . "📌 *Адрес:* {$address->address}\n"
             . "🕒 *Часы работы:* {$address->workHours}\n"
             . "📍 [Карта](https://yandex.ru/maps/?ll={$address->lon},{$address->lat})";
+
+    }
+
+    protected function sendClientCard(GetClientDTO $client): string
+    {
+        return "🏢 *Клиент:* {$client->clientName}\n"
+            . "📌 *Количество поручений:* {$client->count}\n"
+            . "🕒 *Тип поручений:* {$client->type}\n";
 
     }
 }
