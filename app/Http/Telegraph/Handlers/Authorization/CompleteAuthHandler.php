@@ -22,8 +22,6 @@ class CompleteAuthHandler
 
         if ($token) {
             Telegraph::message("Вы успешно авторизовались")->replyKeyboard(MainKeyboard::handle())->send();
-            Telegraph::message("$token")->send();
-
 
             TelegraphUsers::updateOrCreate(
                 ['user_id' => $this->chatId],

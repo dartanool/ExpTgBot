@@ -6,6 +6,8 @@ use App\Http\Telegraph\Handlers\Authorization\SetLoginHandler;
 use App\Http\Telegraph\Handlers\Authorization\SetPasswordHandler;
 use App\Http\Telegraph\Handlers\Location\SetLocation;
 use App\Http\Telegraph\Handlers\Location\SetStation;
+use App\Http\Telegraph\Keyboards\AddressKeyboard;
+use App\Http\Telegraph\Keyboards\CompleteTaskKeyboard;
 use App\Http\Telegraph\Keyboards\StartKeyboard;
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
@@ -53,6 +55,7 @@ class TelegramHandler extends WebhookHandler
 
     }
 
+
     public function completeAcceptation()
     {
         $userId = $this->chat->chat_id;
@@ -72,12 +75,6 @@ class TelegramHandler extends WebhookHandler
 
     }
 
-    public function arriveTrip()
-    {
-        $tripId = $this->data->get('tripId');
-        // Логика отметки прибытия...
-        $this->chat->message("📍 Вы отметили прибытие по заданию #{$tripId}")->send();
-    }
 
     public function showTripsList()
     {
@@ -87,6 +84,26 @@ class TelegramHandler extends WebhookHandler
         (new GetTaskList($userId))->handle();
     }
 
+
+    public function selectTripTask()
+    {
+        $userId = $this->chat->chat_id;
+
+        (new CompleteTask($userId))->selectTripTask($this->data->get('tripId'));
+    }
+    public function getAddressList()
+    {
+        $userId = $this->chat->chat_id;
+
+        (new CompleteTask($userId))->getAddressList($this->data->get('tripId'));
+
+    }
+
+    public function selectAddress()
+    {
+        $userId = $this->chat->chat_id;
+        (new CompleteTask($userId))->selectAddress($this->data->get('id'),$this->data->get('tripId'));
+    }
 
 
 
@@ -126,6 +143,8 @@ class TelegramHandler extends WebhookHandler
             case 'Приём со склада' :
                 (new WarehouseAcceptance($userId))->handle();
                 break;
+            case 'Выполнение задания' :
+                (new CompleteTask($userId))->handle();
 
         }
     }

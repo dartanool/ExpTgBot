@@ -13,7 +13,7 @@ class MainKeyboard
             ReplyButton::make('Установить станцию'),
             ReplyButton::make('Список заданий'),
             ReplyButton::make('Приём со склада'),
-            ReplyButton::make('Выполнить заданий'),
+            ReplyButton::make('Выполнение задания'),
             ReplyButton::make('Завершить заданий '),
             ]);
     }

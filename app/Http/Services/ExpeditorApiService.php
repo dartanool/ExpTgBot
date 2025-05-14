@@ -2,10 +2,13 @@
 
 namespace App\Http\Services;
 
+use App\DTO\GetAddressDTO;
+use App\DTO\GetAddressListDTO;
 use App\DTO\GetTaskDTO;
 use App\DTO\GetTasksListDTO;
 use App\Http\Services\Client\ExpeditorClient;
 use App\Models\Telegraph\TelegraphUsers;
+use DefStudio\Telegraph\Facades\Telegraph;
 use Illuminate\Support\Collection;
 
 class ExpeditorApiService
@@ -55,6 +58,33 @@ class ExpeditorApiService
         );
     }
 
+    public function parseAddressApiResponse(array $apiResponse): GetAddressListDTO
+    {
+        $addresses = [];
+        $count = 0;
+        foreach ($apiResponse['result'] as $item) {
+            $addresses[] = new GetAddressDTO(
+                id : $count,
+                address: $item['AEXO_ADR'],
+                lat: (float)str_replace(',', '.', $item['AEXO_ADR_LAT']),
+                lon: (float)str_replace(',', '.', $item['AEXO_ADR_LON']),
+                workHours: $item['AEXO_TWORK_STOR'],
+                clientName: $item['ADDR_CLIENT']
+
+            );
+            $count++;
+
+//            Telegraph::message("{$item['AEXO_ADR']}")->send();
+
+        }
+//        Telegraph::message('Список адресов4')->send();
+
+
+        return new GetAddressListDTO(
+            success: $apiResponse['result'] === '1',
+            addresses: $addresses,
+        );
+    }
 
     public function getTripById(string $tripId, array $trips): GetTaskDTO
     {
@@ -65,6 +95,16 @@ class ExpeditorApiService
         }
 
         throw new \Exception("Задание не найдено");
+    }
+
+    public function getAddressById(string $addressId, array $addresses) : GetAddressDTO
+    {
+        foreach ($addresses as $address){
+            if ($address->id === $addressId)
+                return $address;
+        }
+        throw new \Exception("Address не найдено");
+
     }
 
 
@@ -207,6 +247,27 @@ class ExpeditorApiService
         ];
 
         return $this->expeditorClient->send($method, $data);
+    }
+    public function getAddressList(string $tripId)
+    {
+        $method = 'rt';
+
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.addrList.r"
+            ],
+            "params" => [
+                "idTrip" =>  $tripId,
+            ]
+        ];
+
+
+        $response = $this->expeditorClient->send($method, $data);
+
+
+        return $this->parseAddressApiResponse($response);
     }
 
 }
