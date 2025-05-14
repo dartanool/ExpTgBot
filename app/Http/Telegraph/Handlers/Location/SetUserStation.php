@@ -17,7 +17,7 @@ class SetUserStation
     }
     public function handle( string $stationId)
     {
-        $this->expeditorApiService->setUserStation($this->chatId, $stationId);
+        $this->expeditorApiService->setUserStation($stationId);
 
         Telegraph::message("успешно");
     }

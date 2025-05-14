@@ -17,12 +17,11 @@ class GetTaskList
     public function __construct(int $chatId)
     {
         $this->expeditorApiService = new ExpeditorApiService($chatId);
-
         $this->userId = $chatId;
     }
     public function handle()
     {
-        $response = $this->expeditorApiService->getTaskList($this->userId);
+        $response = $this->expeditorApiService->getTaskList();
         Telegraph::message('Вот ваш список')->keyboard(TaskListKeyboard::show($response->trips))->send();
     }
 
@@ -31,17 +30,10 @@ class GetTaskList
      */
     public function selectTrip(string $tripId): void
     {
-//
-        $userId = $this->userId;
-        $response = $this->expeditorApiService->getTaskList($userId);
-
-
-        // Получаем данные задания (может быть из кэша или нового API-запроса)
+        $response = $this->expeditorApiService->getTaskList();
         $trip = $this->expeditorApiService->getTripById($tripId, $response->trips);
 
-
         Telegraph::message($this->formatTripDetails($trip))->send();
-        // Отправляем сообщение с новой клавиатурой
 
     }
 

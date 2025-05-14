@@ -38,7 +38,14 @@ class TelegramHandler extends WebhookHandler
 
     }
 
+//СПИСОК ЗАДАНИЙ
+    public function showTripsList()
+    {
+        $userId = $this->chat->chat_id;
 
+        // Возвращаем пользователю исходный список
+        (new GetTaskList($userId))->handle();
+    }
     public function selectTrip()
     {
         $userId = $this->chat->chat_id;
@@ -46,7 +53,7 @@ class TelegramHandler extends WebhookHandler
         (new GetTaskList($userId))->selectTrip($this->data->get('tripId'));
 
     }
-
+//ПРИЁМ СО СКЛАДА
     public function selectTripWareHouse()
     {
         $userId = $this->chat->chat_id;
@@ -54,8 +61,6 @@ class TelegramHandler extends WebhookHandler
         (new WarehouseAcceptance($userId))->selectTripWareHouse($this->data->get('tripId'));
 
     }
-
-
     public function completeAcceptation()
     {
         $userId = $this->chat->chat_id;
@@ -75,15 +80,7 @@ class TelegramHandler extends WebhookHandler
 
     }
 
-
-    public function showTripsList()
-    {
-        $userId = $this->chat->chat_id;
-
-        // Возвращаем пользователю исходный список
-        (new GetTaskList($userId))->handle();
-    }
-
+//ВЫПОЛНЕНИЕ ЗАДАНИЯ
 
     public function selectTripTask()
     {
@@ -98,12 +95,13 @@ class TelegramHandler extends WebhookHandler
         (new CompleteTask($userId))->getAddressList($this->data->get('tripId'));
 
     }
-
     public function selectAddress()
     {
         $userId = $this->chat->chat_id;
         (new CompleteTask($userId))->selectAddress($this->data->get('id'),$this->data->get('tripId'));
     }
+
+
 
 
 

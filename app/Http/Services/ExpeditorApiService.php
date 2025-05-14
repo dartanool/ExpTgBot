@@ -16,11 +16,12 @@ class ExpeditorApiService
 
     protected ExpeditorClient $expeditorClient;
     private string $token;
+    private string $method;
 
     public function __construct(int $userId)
     {
         $this->expeditorClient = new ExpeditorClient();
-
+        $this->method = 'rt';
         $this->token = TelegraphUsers::query()->where('user_id', $userId)->first()->token;
     }
 
@@ -74,11 +75,7 @@ class ExpeditorApiService
             );
             $count++;
 
-//            Telegraph::message("{$item['AEXO_ADR']}")->send();
-
         }
-//        Telegraph::message('Список адресов4')->send();
-
 
         return new GetAddressListDTO(
             success: $apiResponse['result'] === '1',
@@ -121,10 +118,8 @@ class ExpeditorApiService
         return $response['Pragma'];
     }
 
-    public function getCityId(int $userId, string $city)
+    public function getCityId(string $city)
     {
-        $method = 'rt';
-
         $data = [
             'Pragma' => "$this->token",
             'init' => [
@@ -136,17 +131,14 @@ class ExpeditorApiService
             ]
         ];
 
-        $response = $this->expeditorClient->send($method, $data);
+        $response = $this->expeditorClient->send($this->method, $data);
 
         return (int) ($response['result'][0]['ID_KG'] ?? 0);
 
     }
 
-    public function getStationId(int $userId, string $station, string $cityId)
+    public function getStationId(string $station, string $cityId)
     {
-        $method = 'rt';
-
-
         $data = [
             'Pragma' => "$this->token",
             'init' => [
@@ -159,13 +151,13 @@ class ExpeditorApiService
             ]
         ];
 
-        $response = $this->expeditorClient->send($method, $data);
+        $response = $this->expeditorClient->send($this->method, $data);
 
         return (int) ($response['result'][0]['ID_MST'] ?? 0);
 
     }
 
-    public function setUserStation(int $userId, int $stationId)
+    public function setUserStation(int $stationId)
     {
         $method = 'SetUserMst';
 
@@ -177,10 +169,8 @@ class ExpeditorApiService
         $this->expeditorClient->send($method, $data);
     }
 
-    public function getTaskList(int $userId) : GetTasksListDTO
+    public function getTaskList() : GetTasksListDTO
     {
-        $method = 'rt';
-
         $data = [
             'Pragma' => "$this->token ",
             'init' => [
@@ -189,14 +179,14 @@ class ExpeditorApiService
             ]
         ];
 
-        $response = $this->expeditorClient->send($method, $data);
+        $response = $this->expeditorClient->send($this->method, $data);
 
         return $this->parseApiResponse($response);
     }
 
+    //ПРЁМ СО СКЛАД
     public function completeAcceptation(string $tripId)
     {
-        $method = 'rt';
         $data = [
             'Pragma' => "$this->token ",
             "init" => [
@@ -209,13 +199,11 @@ class ExpeditorApiService
             ]
         ];
 
-        return $this->expeditorClient->send($method, $data);
+        return $this->expeditorClient->send($this->method, $data);
     }
 
     public function cancelEvent(string $tripId)
     {
-        $method = 'rt';
-
         $data = [
             'Pragma' => "$this->token ",
             "init" => [
@@ -227,13 +215,11 @@ class ExpeditorApiService
             ]
         ];
 
-        return $this->expeditorClient->send($method, $data);
+        return $this->expeditorClient->send($this->method, $data);
     }
 
     public function finishAcceptation(string $tripId)
     {
-        $method = 'rt';
-
         $data = [
             'Pragma' => "$this->token ",
             "init" => [
@@ -246,12 +232,12 @@ class ExpeditorApiService
             ]
         ];
 
-        return $this->expeditorClient->send($method, $data);
+        return $this->expeditorClient->send($this->method, $data);
     }
+
+    //ВЫПОЛНЕНИЕ ЗАДАНИЯ
     public function getAddressList(string $tripId)
     {
-        $method = 'rt';
-
         $data = [
             'Pragma' => "$this->token ",
             "init" => [
@@ -264,7 +250,7 @@ class ExpeditorApiService
         ];
 
 
-        $response = $this->expeditorClient->send($method, $data);
+        $response = $this->expeditorClient->send($this->method, $data);
 
 
         return $this->parseAddressApiResponse($response);

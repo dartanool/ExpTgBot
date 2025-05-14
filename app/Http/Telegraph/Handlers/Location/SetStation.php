@@ -22,7 +22,7 @@ class SetStation
     {
         $cityId = TelegraphUserState::query()->where('user_id', $this->chatId)->first()->data;
 
-        $stationId = $this->expeditorApiService->getStationId($this->chatId, $station, $cityId);
+        $stationId = $this->expeditorApiService->getStationId($station, $cityId);
 
 
         if ($stationId) {

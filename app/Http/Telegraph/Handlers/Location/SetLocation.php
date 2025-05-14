@@ -29,7 +29,7 @@ class SetLocation
 
     public function setCity(string $city)
     {
-        $cityId = $this->expeditorApiService->getCityId($this->chatId, $city);
+        $cityId = $this->expeditorApiService->getCityId($city);
 
         if ($cityId) {
             TelegraphUserState::query()->updateOrCreate(
