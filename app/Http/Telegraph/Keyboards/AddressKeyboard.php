@@ -18,7 +18,7 @@ class AddressKeyboard
             $buttonText = sprintf(
                 "📍 %s | %s",
                 $address->id,
-                $address->clientName);
+                $address->address);
 
             $keyboard->button($buttonText)
                 ->action('selectAddress')

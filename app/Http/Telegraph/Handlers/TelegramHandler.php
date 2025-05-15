@@ -6,8 +6,6 @@ use App\Http\Telegraph\Handlers\Authorization\SetLoginHandler;
 use App\Http\Telegraph\Handlers\Authorization\SetPasswordHandler;
 use App\Http\Telegraph\Handlers\Location\SetLocation;
 use App\Http\Telegraph\Handlers\Location\SetStation;
-use App\Http\Telegraph\Keyboards\AddressKeyboard;
-use App\Http\Telegraph\Keyboards\CompleteTaskKeyboard;
 use App\Http\Telegraph\Keyboards\StartKeyboard;
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
@@ -18,6 +16,10 @@ use Illuminate\Support\Stringable;
 class TelegramHandler extends WebhookHandler
 {
 
+    protected function getUserId()
+    {
+        return $this->chat->chat_id;
+    }
 
     public function start(): void
     {
@@ -28,105 +30,107 @@ class TelegramHandler extends WebhookHandler
 
     public function auth(): void
     {
-        $userId = $this->chat->chat_id;
-
         TelegraphUserState::query()->updateOrCreate(
-            ['user_id' => $userId],
+            ['user_id' => $this->getUserId()],
             ['state' => 'awaiting_login', 'data' => null]
         );
         Telegraph::message(' Введите сначала логин. Пример: Иванов И.В.')->send();
-
     }
+
 
 //СПИСОК ЗАДАНИЙ
     public function showTripsList()
     {
-        $userId = $this->chat->chat_id;
-
-        // Возвращаем пользователю исходный список
-        (new GetTaskList($userId))->handle();
+        (new GetTaskList($this->getUserId()))->handle();
     }
     public function selectTrip()
     {
-        $userId = $this->chat->chat_id;
-
-        (new GetTaskList($userId))->selectTrip($this->data->get('tripId'));
+        (new GetTaskList($this->getUserId()))->selectTrip($this->data->get('tripId'));
 
     }
 //ПРИЁМ СО СКЛАДА
-    public function selectTripWareHouse()
+    public function acceptanceFromWarehouse()
     {
-        $userId = $this->chat->chat_id;
-
-        (new WarehouseAcceptance($userId))->selectTripWareHouse($this->data->get('tripId'));
-
+        (new WarehouseAcceptance($this->getUserId()))->handle($this->data->get('tripId'));
     }
+    //
     public function completeAcceptation()
     {
-        $userId = $this->chat->chat_id;
-        (new WarehouseAcceptance($userId))->completeAcceptation($this->data->get('tripId'));
+        (new WarehouseAcceptance($this->getUserId()))->completeAcceptation($this->data->get('tripId'));
     }
 
     public function cancelEvent()
     {
-        $userId = $this->chat->chat_id;
-        (new WarehouseAcceptance($userId))->cancelEvent($this->data->get('tripId'));
+        (new WarehouseAcceptance($this->getUserId()))->cancelEvent($this->data->get('tripId'));
     }
 
     public function finishAcceptation()
     {
-        $userId = $this->chat->chat_id;
-        (new WarehouseAcceptance($userId))->finishAcceptation($this->data->get('tripId'));
-
+        (new WarehouseAcceptance($this->getUserId()))->finishAcceptation($this->data->get('tripId'));
     }
 
 //ВЫПОЛНЕНИЕ ЗАДАНИЯ
 
-    public function selectTripTask()
-    {
-        $userId = $this->chat->chat_id;
 
-        (new CompleteTask($userId))->selectTripTask($this->data->get('tripId'));
+    public function completeTask()
+    {
+        (new CompleteTask($this->getUserId()))->handle($this->data->get('tripId'));
+
     }
     public function getAddressList()
     {
-        $userId = $this->chat->chat_id;
-
-        (new CompleteTask($userId))->getAddressList($this->data->get('tripId'));
-
+        (new CompleteTask($this->getUserId()))->getAddressList($this->data->get('tripId'));
     }
     public function selectAddress()
     {
-        $userId = $this->chat->chat_id;
-        (new CompleteTask($userId))->selectAddress($this->data->get('addressId'),$this->data->get('tripId'));
+        (new CompleteTask($this->getUserId()))->selectAddress($this->data->get('addressId'),$this->data->get('tripId'));
     }
 
     public function arrivedToAddress()
     {
-        $userId = $this->chat->chat_id;
-        (new CompleteTask($userId))->arrivedToAddress($this->data->get('addressId'),$this->data->get('tripId'));
+        (new CompleteTask($this->getUserId()))->arrivedToAddress($this->data->get('addressId'),$this->data->get('tripId'));
     }
     public function leftAtTheAddress()
     {
-        $userId = $this->chat->chat_id;
-        (new CompleteTask($userId))->leftAtTheAddress($this->data->get('addressId'),$this->data->get('tripId'));
+        (new CompleteTask($this->getUserId()))->leftAtTheAddress($this->data->get('addressId'),$this->data->get('tripId'));
     }
     public function getClientList()
     {
-        $userId = $this->chat->chat_id;
-        (new CompleteTask($userId))->getClientListByAddress($this->data->get('addressId'),$this->data->get('tripId'));
+        (new CompleteTask($this->getUserId()))->getClientListByAddress($this->data->get('addressId'),$this->data->get('tripId'));
     }
     public function selectClient()
     {
-        $userId = $this->chat->chat_id;
-        (new CompleteTask($userId))->selectClient($this->data->get('clientId'),$this->data->get('tripId'),$this->data->get('addressId') );
+        (new CompleteTask($this->getUserId()))->selectClient($this->data->get('clientName'), $this->data->get('addressId') );
     }
+
+
+    //ЗАВЕРШИТЬ ЗАДАНИЕ
+    public function finishTask()
+    {
+        (new FinishTask($this->getUserId()))->handle($this->data->get('tripId'));
+    }
+    public function arrivedToUnload()
+    {
+        (new FinishTask($this->getUserId()))->arrivedToUnload($this->data->get('tripId'));
+
+    }
+    public function completeDelivery()
+    {
+        (new FinishTask($this->getUserId()))->completeDelivery($this->data->get('tripId'));
+
+    }
+    public function submitVehicleAndDocuments()
+    {
+        (new FinishTask($this->getUserId()))->submitVehicleAndDocuments($this->data->get('tripId'));
+
+    }
+
 
 
     public function handleChatMessage(Stringable $text): void
     {
 
-        $userId = $this->message->from()->id();
+        $userId =$this->getUserId();
         $userState = TelegraphUserState::query()->where('user_id', $userId)->first();
 
         if ($userState){
@@ -144,8 +148,6 @@ class TelegramHandler extends WebhookHandler
                 case 'awaiting_station':
                     (new SetStation($userId))->handle($text->toString());
                     break;
-
-
             }
         }
 
@@ -156,12 +158,6 @@ class TelegramHandler extends WebhookHandler
             case 'Установить станцию' :
                 (new SetLocation($userId))->location();
                 break;
-            case 'Приём со склада' :
-                (new WarehouseAcceptance($userId))->handle();
-                break;
-            case 'Выполнение задания' :
-                (new CompleteTask($userId))->handle();
-
         }
     }
 

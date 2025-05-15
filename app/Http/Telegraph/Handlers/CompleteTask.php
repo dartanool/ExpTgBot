@@ -9,7 +9,7 @@ use App\Http\Services\ExpeditorApiService;
 use App\Http\Telegraph\Keyboards\AddressKeyboard;
 use App\Http\Telegraph\Keyboards\ClientKeyboard;
 use App\Http\Telegraph\Keyboards\CompleteTaskKeyboard;
-use App\Http\Telegraph\Keyboards\TaskListKeyboard;
+use App\Models\Telegraph\TelegraphUserLocation;
 use DefStudio\Telegraph\Facades\Telegraph;
 
 class CompleteTask
@@ -23,15 +23,10 @@ class CompleteTask
         $this->expeditorApiService = new ExpeditorApiService($userId);
     }
 
-        public function handle()
+    public function handle(string $tripId)
     {
-        $response = $this->expeditorApiService->getTaskList();
-        Telegraph::message('Вот ваш список')->keyboard(CompleteTaskKeyboard::handle($response->trips))->send();
+        $this->expeditorApiService->completeTask($tripId);
 
-    }
-
-    public function selectTripTask(string $tripId)
-    {
         $response = $this->expeditorApiService->getTaskList();
         $trip = $this->expeditorApiService->getTripById($tripId, $response->trips);
 
@@ -42,57 +37,64 @@ class CompleteTask
     public function getAddressList(string $tripId)
     {
         $response = $this->expeditorApiService->getAddressList($tripId);
-
         Telegraph::message('Список адресов')->keyboard(AddressKeyboard::show($response->addresses, $tripId))->send();
-
     }
-
 
     /**
      * @throws \Exception
      */
     public function selectAddress(string $addressId, string $tripId)
     {
-        $response = $this->expeditorApiService->getAddressList($tripId);
-        $address = $this->expeditorApiService->getAddressById($addressId, $response->addresses);
+        $address = $this->expeditorApiService->getAddressByAddressIdTripId($addressId, $tripId);
+//        $addresses = $this->expeditorApiService->getAddressList($tripId);
+//        $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
 
         Telegraph::message($this->sendAddressCard($address))->keyboard(AddressKeyboard::createDetailsKeyboard($address, $tripId))->send();
-
-
     }
     public function arrivedToAddress(string $addressId, string $tripId)
     {
-        $addresses = $this->expeditorApiService->getAddressList($tripId);
-        $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
+//        $addresses = $this->expeditorApiService->getAddressList($tripId);
+//        $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
+        $address = $this->expeditorApiService->getAddressByAddressIdTripId($addressId, $tripId);
 
         $this->expeditorApiService->arrivedToAddress($tripId, $address->address);
     }
     public function leftAtTheAddress(string $addressId, string $tripId)
     {
-        $addresses = $this->expeditorApiService->getAddressList($tripId);
-        $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
+//        $addresses = $this->expeditorApiService->getAddressList($tripId);
+//        $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
+        $address = $this->expeditorApiService->getAddressByAddressIdTripId($addressId, $tripId);
 
         $this->expeditorApiService->leftAtTheAddress($tripId, $address->address);
     }
+
+
     public function getClientListByAddress(string $addressId, string $tripId)
     {
-        $addresses = $this->expeditorApiService->getAddressList($tripId);
-        $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
+//        $addresses = $this->expeditorApiService->getAddressList($tripId);
+//        $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
+        $address = $this->expeditorApiService->getAddressByAddressIdTripId($addressId, $tripId);
 
         $clientList = $this->expeditorApiService->getClientList($tripId, $address->address);
-        Telegraph::message('Список клиентов по данному адресу')->keyboard(ClientKeyboard::show($clientList->clients, $tripId, $addressId))->send();
+        Telegraph::message('Список клиентов по данному адресу')->keyboard(ClientKeyboard::show($clientList->clients, $addressId))->send();
 //        Telegraph::message('Список клиентов по данному адресу')->keyboard(ClientKeyboard::show($clientList->clients, $tripId, $addressId))->send();
 
     }
 
-    public function selectClient(string $clientId, string $tripId, string $addressId)
+    public function selectClient(string $clientName, string $addressId)
     {
-        $addresses = $this->expeditorApiService->getAddressList($tripId);
-        $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
-        $clients = $this->expeditorApiService->getClientList($tripId, $address->address);
+        $cityId = TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
 
-        $client = $this->expeditorApiService->getClientById($clientId, $clients->clients);
-        Telegraph::message("{$client->clientName}")->send();
+        $tripId = $this->expeditorApiService->getCurrentTask($cityId->city_id);
+
+//        $addresses = $this->expeditorApiService->getAddressList($tripId);
+//        $address = $this->expeditorApiService->getAddressById($addressId, $addresses->addresses);
+
+        $address = $this->expeditorApiService->getAddressByAddressIdTripId($addressId, $tripId);
+
+        $clients = $this->expeditorApiService->getClientList($tripId, $address->address);
+        $client = $this->expeditorApiService->getClientByName($clientName, $clients->clients);
+
         Telegraph::message($this->sendClientCard($client))->send();
     }
 

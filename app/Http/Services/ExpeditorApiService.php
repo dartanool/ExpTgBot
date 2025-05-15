@@ -11,7 +11,6 @@ use App\DTO\GetTasksListDTO;
 use App\Http\Services\Client\ExpeditorClient;
 use App\Models\Telegraph\TelegraphUsers;
 use DefStudio\Telegraph\Facades\Telegraph;
-use Illuminate\Support\Collection;
 
 class ExpeditorApiService
 {
@@ -26,9 +25,6 @@ class ExpeditorApiService
         $this->method = 'rt';
         $this->token = TelegraphUsers::query()->where('user_id', $userId)->first()->token;
     }
-
-
-
 
     public function parseApiResponse(array $apiResponse): GetTasksListDTO
     {
@@ -64,7 +60,7 @@ class ExpeditorApiService
     public function parseAddressApiResponse(array $apiResponse): GetAddressListDTO
     {
         $addresses = [];
-        $count = 0;
+        $count = 1;
         foreach ($apiResponse['result'] as $item) {
             $addresses[] = new GetAddressDTO(
                 id : $count,
@@ -87,7 +83,7 @@ class ExpeditorApiService
     public function parseClientApiResponse(array $apiResponse): GetClientListDTO
     {
         $clients = [];
-        $count = 0;
+        $count = 1;
         foreach ($apiResponse['result'] as $item) {
             $clients[] = new GetClientDTO(
                 id : $count,
@@ -125,13 +121,23 @@ class ExpeditorApiService
 
     }
 
-    public function getClientById(string $clientId, array $clients) :GetClientDTO
+    public function getAddressByAddressIdTripId(string $addressId, string $tripId) : GetAddressDTO
     {
-        Telegraph::message("$clientId")->send();
-        foreach ($clients as $client){
-            if ($client->id === $clientId)
-                Telegraph::message("$client->id")->send();
+        $addresses = $this->getAddressList($tripId);
 
+        foreach ($addresses->addresses as $address){
+            if ($address->id === $addressId)
+                return $address;
+        }
+        throw new \Exception(" Address не найдено");
+
+    }
+
+    public function getClientByName(string $clientName, array $clients) :GetClientDTO
+    {
+        Telegraph::message("$clientName")->send();
+        foreach ($clients as $client){
+            if ($client->clientName === $clientName)
                 return $client;
         }
         throw new \Exception(" Address не найдено");
@@ -216,8 +222,41 @@ class ExpeditorApiService
 
         return $this->parseApiResponse($response);
     }
+    public function getCurrentTask(int $cityId)
+    {
+        $data = [
+            'Pragma' => "$this->token ",
+            'init' => [
+                'type' => 'data',
+                'report' => 'te.trip.r'
+            ],
+            'params' => [
+                'idKg' => $cityId,
+            ]
+        ];
+
+        $response = $this->expeditorClient->send($this->method, $data);
+
+        return (string) ($response['result'][0]['ID_AEX_TRIP'] ?? 0);
+    }
 
     //ПРЁМ СО СКЛАД
+
+    public function acceptanceFromWarehouse(string $tripId)
+    {
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.ttnList.r"
+            ],
+            "params" => [
+                "idTrip" => $tripId,
+            ]
+        ];
+
+        return $this->expeditorClient->send($this->method, $data);
+    }
     public function completeAcceptation(string $tripId)
     {
         $data = [
@@ -269,6 +308,25 @@ class ExpeditorApiService
     }
 
     //ВЫПОЛНЕНИЕ ЗАДАНИЯ
+
+    public function completeTask(string $tripId)
+    {
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.event.w"
+            ],
+            "params" => [
+                "eventCode" => "st.1.47.0",
+                "eventIdTrip" =>  $tripId,
+                "eventLat" => 1,
+                "eventLon" =>1
+            ]
+        ];
+
+        return $this->expeditorClient->send($this->method, $data);
+    }
     public function getAddressList(string $tripId)
     {
         $data = [
@@ -344,5 +402,62 @@ class ExpeditorApiService
         $response = $this->expeditorClient->send($this->method, $data);
 
         return $this->parseClientApiResponse($response);
+    }
+
+
+    //ЗАВЕРШЕНИЕ ЗАДАНИЯ
+    public function arrivedToUnload(string $tripId)
+    {
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.event.w"
+            ],
+            "params" => [
+                "eventCode" => "st.1.77.1",
+        		"eventIdTrip" => $tripId,
+       		    "eventLat" => 1,
+        		"eventLon" => 1,
+            ]
+        ];
+
+        $response = $this->expeditorClient->send($this->method, $data);
+    }
+
+    public function completeDelivery(string $tripId)
+    {
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.event.w"
+            ],
+            "params" => [
+                "eventCode" => "st.1.77.2",
+                "eventIdTrip" => $tripId,
+                "eventLat" => 1,
+                "eventLon" => 1,
+            ]
+        ];
+        $response = $this->expeditorClient->send($this->method, $data);
+    }
+
+    public function submitVehicleAndDocuments(string $tripId)
+    {
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.event.w"
+            ],
+            "params" => [
+                "eventCode" => "st.1.48.0",
+                "eventIdTrip" => $tripId,
+                "eventLat" => 1,
+                "eventLon" => 1,
+            ]
+        ];
+        $response = $this->expeditorClient->send($this->method, $data);
     }
 }

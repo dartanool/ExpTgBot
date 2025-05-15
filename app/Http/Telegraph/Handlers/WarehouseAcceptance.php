@@ -9,31 +9,26 @@ use DefStudio\Telegraph\Facades\Telegraph;
 
 class WarehouseAcceptance
 {
-    private int $userId;
     private ExpeditorApiService $expeditorApiService;
 
     public function __construct(int $userId)
     {
-        $this->userId = $userId;
         $this->expeditorApiService = new ExpeditorApiService($userId);
     }
-    public function handle()
+    public function handle(string $tripId)
     {
-        $response = $this->expeditorApiService->getTaskList();
-        Telegraph::message('Вот ваш список')->keyboard(TaskListKeyboard::handle($response->trips))->send();
-    }
+        $this->expeditorApiService->acceptanceFromWarehouse($tripId);
 
-    /**
-     * @throws \Exception
-     */
-    public function selectTripWareHouse(string $tripId): void
-    {
         $response = $this->expeditorApiService->getTaskList();
         $trip = $this->expeditorApiService->getTripById($tripId, $response->trips);
 
         Telegraph::message($this->formatTripDetails($trip))->keyboard(TaskListKeyboard::createDetailsKeyboard($trip))
             ->send();
     }
+
+    /**
+     * @throws \Exception
+     */
 
     public function completeAcceptation(string $tripId)
     {
@@ -54,6 +49,7 @@ class WarehouseAcceptance
         Telegraph::message('Finish acceptation')->send();
 //        $response = $this->expeditorApiService->finishAcceptation($tripId);
     }
+
 
     private function formatTripDetails(GetTaskDTO $trip): string
     {

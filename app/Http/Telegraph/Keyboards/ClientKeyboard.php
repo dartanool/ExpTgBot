@@ -2,12 +2,13 @@
 
 namespace App\Http\Telegraph\Keyboards;
 
+use App\Http\Telegraph\Handlers\CompleteTask;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Keyboard\Keyboard;
 
 class ClientKeyboard
 {
-    public static function show(array $clients, string $tripId, string $addressId)
+    public static function show(array $clients, string $addressId)
     {
         $keyboard = Keyboard::make();
 
@@ -18,10 +19,12 @@ class ClientKeyboard
                 $client->id,
                 $client->clientName);
 
+
             $keyboard->button($buttonText)
                 ->action('selectClient')
-                ->param('clientId', $client->id)
-                ->param('tripId', $tripId);
+                ->param('clientName', $client->clientName)
+//                ->param('tripId', $tripId)
+                ->param('addressId', $addressId);
         }
 
         // Добавляем кнопку "Отмена"
