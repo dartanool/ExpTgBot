@@ -69,13 +69,11 @@ class TelegramHandler extends WebhookHandler
         (new WarehouseAcceptance($this->getUserId()))->finishAcceptation($this->data->get('tripId'));
     }
 
+
 //ВЫПОЛНЕНИЕ ЗАДАНИЯ
-
-
     public function completeTask()
     {
         (new CompleteTask($this->getUserId()))->handle($this->data->get('tripId'));
-
     }
     public function getAddressList()
     {
@@ -117,12 +115,10 @@ class TelegramHandler extends WebhookHandler
     public function completeDelivery()
     {
         (new FinishTask($this->getUserId()))->completeDelivery($this->data->get('tripId'));
-
     }
     public function submitVehicleAndDocuments()
     {
         (new FinishTask($this->getUserId()))->submitVehicleAndDocuments($this->data->get('tripId'));
-
     }
 
 

@@ -8,7 +8,7 @@ use DefStudio\Telegraph\Keyboard\Keyboard;
 
 class ClientKeyboard
 {
-    public static function show(array $clients, string $addressId)
+    public static function handle(array $clients, string $addressId)
     {
         $keyboard = Keyboard::make();
 
