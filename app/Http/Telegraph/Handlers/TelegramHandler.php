@@ -10,11 +10,13 @@ use App\Http\Telegraph\Keyboards\StartKeyboard;
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Stringable;
 
 
 class TelegramHandler extends WebhookHandler
 {
+    protected ?\Closure $locationCallback = null;
 
     protected function getUserId()
     {
@@ -23,6 +25,16 @@ class TelegramHandler extends WebhookHandler
 
     public function start(): void
     {
+        $this->requestLocation(function(array $location) {
+            // Этот код выполнится когда пользователь отправит местоположение
+            $latitude = $location['latitude'];
+            $longitude = $location['longitude'];
+
+            // Продолжаем процесс доставки с полученными координатами
+            $this->processDeliveryWithLocation($latitude, $longitude);
+        });
+
+        Telegraph::message("Добро пожаловать. {$this->message->location()->latitude()}")->send();
         Telegraph::message('Добро пожаловать. Вам необходимо авторизоваться.')
             ->keyboard(StartKeyboard::handle())->send();
     }
@@ -56,6 +68,7 @@ class TelegramHandler extends WebhookHandler
     //
     public function completeAcceptation()
     {
+
         (new WarehouseAcceptance($this->getUserId()))->completeAcceptation($this->data->get('tripId'));
     }
 
@@ -158,7 +171,38 @@ class TelegramHandler extends WebhookHandler
     }
 
 
+    public function requestLocation(\Closure $callback): void
+    {
+        // Сохраняем колбэк для последующего вызова
+        $this->locationCallback = $callback;
 
+        Telegraph::message('Пожалуйста, поделитесь своим местоположением')
+            ->replyKeyboard([
+                [['text' => '📍 Отправить местоположение', 'request_location' => true]]
+            ])
+            ->send();
+    }
+    public function handleLocation(): void
+    {
+        if (!$this->message?->location()) {
+            return;
+        }
+
+        $location = $this->message->location();
+        $coords = [
+            'latitude' => $location->latitude(),
+            'longitude' => $location->longitude(),
+            'user_id' => $this->getUserId()
+        ];
+
+        // Вызываем колбэк если он был установлен
+        if ($this->locationCallback) {
+            call_user_func($this->locationCallback, $coords);
+            $this->locationCallback = null; // Очищаем после вызова
+        }
+
+        Telegraph::removeReplyKeyboard()->send();
+    }
 
 
 

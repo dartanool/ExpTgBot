@@ -7,18 +7,22 @@ use DefStudio\Telegraph\Facades\Telegraph;
 
 class SetUserStation
 {
-    private int $chatId;
     private ExpeditorApiService $expeditorApiService;
 
     public function __construct(int $chatId)
     {
-        $this->chatId = $chatId;
         $this->expeditorApiService = new ExpeditorApiService($chatId);
     }
-    public function handle( string $stationId)
+    public function handle(string $stationId)
     {
-        $this->expeditorApiService->setUserStation($stationId);
+        $response = $this->expeditorApiService->setUserStation($stationId);
 
-        Telegraph::message("успешно");
+        if ($response->status() == 200)
+        {
+            Telegraph::message("Станция успешно установлена")->send();
+        } else {
+            Telegraph::message("Попробуйте еще раз установить станцию")->send();
+
+        }
     }
 }

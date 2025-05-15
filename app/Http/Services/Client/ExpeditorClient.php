@@ -16,7 +16,7 @@ class ExpeditorClient
         $this->baseUrl = env('API_BASE_URL');
     }
 
-    public function auth(string $method, array $data)
+    public function returnJson(string $method, array $data)
     {
         $response = Http::withHeaders([
             'Authorization' => 'Basic '. $this->apiToken,
@@ -27,10 +27,10 @@ class ExpeditorClient
 //            'method' => $method,
             'status' => $response->status(),
 //            'headers' => $response->headers(),
-            'body' => $response->json()
+            'body' => $response->body()
         ]);
 
-        return $response->json();
+        return $response;
     }
 
     public function send(string $method, array $data)
@@ -45,11 +45,11 @@ class ExpeditorClient
         Log::debug('API Response', [
 //            'method' => $method,
             'status' => $response->status(),
-            'headers' => $response->headers(),
-            'body' => $response->json()
+//            'headers' => $response->headers(),
+            'body' => $response->body()
         ]);
 
-        if ($response->status())
+        if ($response->status() == 200)
         {
             return $response->json();
         }

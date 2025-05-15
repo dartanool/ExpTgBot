@@ -24,8 +24,8 @@ class SetStation
 
         $stationId = $this->expeditorApiService->getStationId($station, $cityId);
 
-
         if ($stationId) {
+
             $this->setUserStation->handle($stationId);
 
             TelegraphUserLocation::query()->updateOrCreate([

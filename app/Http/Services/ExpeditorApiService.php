@@ -152,7 +152,7 @@ class ExpeditorApiService
         ];
 
         $method ='GetSession';
-        $response = $this->expeditorClient->auth($method, $data);
+        $response = $this->expeditorClient->send($method, $data);
 
         return $response['Pragma'];
     }
@@ -205,7 +205,7 @@ class ExpeditorApiService
             'mst' => "$stationId"
         ];
 
-        $this->expeditorClient->send($method, $data);
+        return $this->expeditorClient->returnJson($method, $data);
     }
 
     public function getTaskList() : GetTasksListDTO
