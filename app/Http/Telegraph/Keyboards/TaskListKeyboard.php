@@ -21,7 +21,7 @@ class TaskListKeyboard
                 $trip->cityName);
 
             $keyboard->button($buttonText)
-                ->action('selectTripWareHouse')
+                ->action('selectTrip')
                 ->param('tripId', $trip->id);
         }
 
@@ -34,8 +34,10 @@ class TaskListKeyboard
     public static function createDetailsKeyboard(GetTaskDTO $trip): Keyboard
     {
         return Keyboard::make()
+            ->button('✅ Ознакомлен с заданием')->action('markAsRead')->param('tripId', $trip->id)
             ->button('✅ Груз погружен')->action('completeAcceptation')->param('tripId', $trip->id)
             ->button('📍 Отмена события')->action('cancelEvent')->param('tripId', $trip->id)
+            ->button('📍 Перемещение отправления на ТС по поручению  ')->action('moveByOrder')->param('tripId', $trip->id)
             ->button('🔙 Окончил приём')->action('finishAcceptation')->param('tripId', $trip->id)    ;
     }
 }

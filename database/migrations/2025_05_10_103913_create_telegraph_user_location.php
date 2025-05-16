@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('telegraph_user_locations', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('user_id')->unique(); // ID пользователя Telegram
-
-            $table->foreignId('user_id')->references('user_id')->on('telegraph_users')->onDelete('cascade');;
+            $table->foreignId('user_id')->unique()->references('user_id')->on('telegraph_users')->onDelete('cascade');;
             $table->integer('city_id')->nullable();
             $table->string('station_id')->nullable();
+            $table->string('event_lat')->nullable();
+            $table->string('event_lon')->nullable();
             $table->timestamps();
         });
     }

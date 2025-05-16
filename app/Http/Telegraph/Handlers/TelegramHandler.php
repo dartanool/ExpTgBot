@@ -7,6 +7,7 @@ use App\Http\Telegraph\Handlers\Authorization\SetPasswordHandler;
 use App\Http\Telegraph\Handlers\Location\SetLocation;
 use App\Http\Telegraph\Handlers\Location\SetStation;
 use App\Http\Telegraph\Keyboards\StartKeyboard;
+use App\Models\Telegraph\TelegraphUserLocation;
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
@@ -25,16 +26,16 @@ class TelegramHandler extends WebhookHandler
 
     public function start(): void
     {
-        $this->requestLocation(function(array $location) {
-            // Этот код выполнится когда пользователь отправит местоположение
-            $latitude = $location['latitude'];
-            $longitude = $location['longitude'];
+//        $this->requestLocation(function(array $location) {
+//            // Этот код выполнится когда пользователь отправит местоположение
+//            $latitude = $location['latitude'];
+//            $longitude = $location['longitude'];
+//
+//            // Продолжаем процесс доставки с полученными координатами
+//            $this->processDeliveryWithLocation($latitude, $longitude);
+//        });
 
-            // Продолжаем процесс доставки с полученными координатами
-            $this->processDeliveryWithLocation($latitude, $longitude);
-        });
-
-        Telegraph::message("Добро пожаловать. {$this->message->location()->latitude()}")->send();
+//        Telegraph::message("Добро пожаловать. {$this->message->location()->latitude()}")->send();
         Telegraph::message('Добро пожаловать. Вам необходимо авторизоваться.')
             ->keyboard(StartKeyboard::handle())->send();
     }
@@ -61,9 +62,20 @@ class TelegramHandler extends WebhookHandler
 
     }
 //ПРИЁМ СО СКЛАДА
+
     public function acceptanceFromWarehouse()
     {
         (new WarehouseAcceptance($this->getUserId()))->handle($this->data->get('tripId'));
+    }
+    public function markAsRead()
+    {
+        (new WarehouseAcceptance($this->getUserId()))->markAsRead($this->data->get('tripId'));
+
+    }
+    public function moveByOrder()
+    {
+        (new WarehouseAcceptance($this->getUserId()))->moveByOrder($this->data->get('tripId'));
+
     }
     //
     public function completeAcceptation()
@@ -139,6 +151,10 @@ class TelegramHandler extends WebhookHandler
     public function handleChatMessage(Stringable $text): void
     {
 
+        if ($this->message->location()) {
+            $this->handleLocation();
+        }
+
         $userId =$this->getUserId();
         $userState = TelegraphUserState::query()->where('user_id', $userId)->first();
 
@@ -171,37 +187,21 @@ class TelegramHandler extends WebhookHandler
     }
 
 
-    public function requestLocation(\Closure $callback): void
-    {
-        // Сохраняем колбэк для последующего вызова
-        $this->locationCallback = $callback;
 
-        Telegraph::message('Пожалуйста, поделитесь своим местоположением')
-            ->replyKeyboard([
-                [['text' => '📍 Отправить местоположение', 'request_location' => true]]
-            ])
-            ->send();
-    }
     public function handleLocation(): void
     {
-        if (!$this->message?->location()) {
-            return;
-        }
+        Telegraph::message("Достав")->send();
+        $userId = $this->getUserId();
 
         $location = $this->message->location();
-        $coords = [
-            'latitude' => $location->latitude(),
-            'longitude' => $location->longitude(),
-            'user_id' => $this->getUserId()
-        ];
 
-        // Вызываем колбэк если он был установлен
-        if ($this->locationCallback) {
-            call_user_func($this->locationCallback, $coords);
-            $this->locationCallback = null; // Очищаем после вызова
-        }
+        TelegraphUserLocation::query()->where('user_id', $userId)->update(
+            [
+                'event_lat' => $location->latitude(),
+                'event_lon' => $location->longitude()
+            ]
+        );
 
-        Telegraph::removeReplyKeyboard()->send();
     }
 
 

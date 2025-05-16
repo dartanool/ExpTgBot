@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $user_id
  * @property int $city_id
  * @property int $station_id
+ * @property int $event_lat
+ * @property int $event_lon
  */
 class TelegraphUserLocation extends Model
 {
@@ -17,5 +19,7 @@ class TelegraphUserLocation extends Model
         'user_id',
         'city_id',
         'station_id',
+        'event_lat',
+        'event_lon'
     ];
 }

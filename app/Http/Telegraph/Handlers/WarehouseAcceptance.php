@@ -5,14 +5,16 @@ namespace App\Http\Telegraph\Handlers;
 use App\DTO\GetTaskDTO;
 use App\Http\Services\ExpeditorApiService;
 use App\Http\Telegraph\Keyboards\TaskListKeyboard;
+use App\Models\Telegraph\TelegraphUserLocation;
 use DefStudio\Telegraph\Facades\Telegraph;
 
 class WarehouseAcceptance
 {
     private ExpeditorApiService $expeditorApiService;
-
+    private int $userId;
     public function __construct(int $userId)
     {
+        $this->userId = $userId;
         $this->expeditorApiService = new ExpeditorApiService($userId);
     }
     public function handle(string $tripId)
@@ -26,21 +28,35 @@ class WarehouseAcceptance
             ->send();
     }
 
-    /**
-     * @throws \Exception
-     */
+   public function markAsRead(string $tripId)
+   {
+        $location = TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
+        $this->expeditorApiService->markAsRead($tripId, $location->event_lat, $location->event_lon);
+   }
+    public function moveByOrder(string $tripId)
+    {
+        $location = TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
+        $this->expeditorApiService->moveByOrder($tripId, $location->event_lat, $location->event_lon);
+    }
 
     public function completeAcceptation(string $tripId)
     {
+        Telegraph::message('Для создания события необходимо выполнить команду 📍 Отправить местоположение')->send();
 
-        Telegraph::message('Complete acceptation')->send();
-//        $response = $this->expeditorApiService->completeAcceptation($tripId);
+        $location = TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
+
+        if ($location->event_lat & $location->event_lon) {
+            $response = $this->expeditorApiService->completeAcceptation($tripId);
+        } else {
+            Telegraph::message('Необходимо выполнить команду 📍 Отправить местоположение')->send();
+        }
     }
+
 
     public function cancelEvent(string $tripId)
     {
         Telegraph::message('Cancel event')->send();
-//        $response = $this->expeditorApiService->cancelEvent($tripId);
+        $response = $this->expeditorApiService->cancelEvent($tripId);
     }
 
 

@@ -16,7 +16,6 @@ class ActionKeyboard
                 Button::make('Приём со склада')->action('acceptanceFromWarehouse')->param('tripId', $tripId),
                 Button::make('Выполнение задания')->action('completeTask')->param('tripId', $tripId),
                 Button::make('Завершить заданий')->action('finishTask')->param('tripId', $tripId),
-                Button::make('Location')->action('finishTask')->param('tripId', $tripId),
             ]);
     }
 }

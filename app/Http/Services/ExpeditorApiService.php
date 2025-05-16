@@ -257,6 +257,43 @@ class ExpeditorApiService
 
         return $this->expeditorClient->send($this->method, $data);
     }
+    public function markAsRead(string $tripId, string $eventLat, string $eventLon)
+    {
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.event.w"
+            ],
+            "params" => [
+                "eventCode" => "st.1.46.1",
+                "eventIdTrip" => $tripId,
+                "eventLat" => $eventLat,
+                "eventLon" => $eventLon,
+            ]
+        ];
+
+        return $this->expeditorClient->send($this->method, $data);
+    }
+
+    public function moveByOrder(string $tripId, string $eventLat, string $eventLon)
+    {
+        $data = [
+            'Pragma' => "$this->token ",
+            "init" => [
+                "type" => "data",
+                "report" => "te.event.w"
+            ],
+            "params" => [
+                "eventCode" => "st.2.72.0",
+                "eventIdTrip" => $tripId,
+                "eventLat" => $eventLat,
+                "eventLon" => $eventLon,
+            ]
+        ];
+
+        return $this->expeditorClient->send($this->method, $data);
+    }
     public function completeAcceptation(string $tripId)
     {
         $data = [
