@@ -17,7 +17,6 @@ use Illuminate\Support\Stringable;
 
 class TelegramHandler extends WebhookHandler
 {
-    protected ?\Closure $locationCallback = null;
 
     protected function getUserId()
     {
@@ -26,16 +25,6 @@ class TelegramHandler extends WebhookHandler
 
     public function start(): void
     {
-//        $this->requestLocation(function(array $location) {
-//            // Этот код выполнится когда пользователь отправит местоположение
-//            $latitude = $location['latitude'];
-//            $longitude = $location['longitude'];
-//
-//            // Продолжаем процесс доставки с полученными координатами
-//            $this->processDeliveryWithLocation($latitude, $longitude);
-//        });
-
-//        Telegraph::message("Добро пожаловать. {$this->message->location()->latitude()}")->send();
         Telegraph::message('Добро пожаловать. Вам необходимо авторизоваться.')
             ->keyboard(StartKeyboard::handle())->send();
     }
@@ -65,7 +54,7 @@ class TelegramHandler extends WebhookHandler
 
     public function acceptanceFromWarehouse()
     {
-        (new WarehouseAcceptance($this->getUserId()))->handle($this->data->get('tripId'));
+        (new WarehouseAcceptance($this->getUserId()))->handle($this->messageId, $this->data->get('tripId'));
     }
     public function markAsRead()
     {
@@ -102,20 +91,20 @@ class TelegramHandler extends WebhookHandler
     }
     public function getAddressList()
     {
-        (new CompleteTask($this->getUserId()))->getAddressList($this->data->get('tripId'));
+        (new CompleteTask($this->getUserId()))->getAddressList($this->messageId,$this->data->get('tripId'));
     }
     public function selectAddress()
     {
-        (new CompleteTask($this->getUserId()))->selectAddress($this->data->get('addressId'),$this->data->get('tripId'));
+        (new CompleteTask($this->getUserId()))->selectAddress($this->messageId, $this->data->get('addressId'),$this->data->get('tripId'));
     }
 
     public function arrivedToAddress()
     {
         (new CompleteTask($this->getUserId()))->arrivedToAddress($this->data->get('addressId'),$this->data->get('tripId'));
     }
-    public function leftAtTheAddress()
+    public function leftAtAddress()
     {
-        (new CompleteTask($this->getUserId()))->leftAtTheAddress($this->data->get('addressId'),$this->data->get('tripId'));
+        (new CompleteTask($this->getUserId()))->leftAtAddress($this->data->get('addressId'),$this->data->get('tripId'));
     }
     public function getClientList()
     {
@@ -190,7 +179,6 @@ class TelegramHandler extends WebhookHandler
 
     public function handleLocation(): void
     {
-        Telegraph::message("Достав")->send();
         $userId = $this->getUserId();
 
         $location = $this->message->location();

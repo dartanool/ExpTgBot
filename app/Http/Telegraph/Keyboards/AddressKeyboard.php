@@ -27,7 +27,7 @@ class AddressKeyboard
         }
 
         // Добавляем кнопку "Отмена"
-        $keyboard->button('❌ Отмена')->action('cancel_trips');
+        $keyboard->button('❌ Отмена')->action('getAddressList')->param('tripId', $tripId);
 
         return $keyboard;
     }
@@ -35,9 +35,10 @@ class AddressKeyboard
     public static function createDetailsKeyboard(GetAddressDTO $address, string $tripId): Keyboard
     {
         return Keyboard::make()
+            ->button('✅Убыл по адресу')->action('leftAtAddress')->param('addressId', $address->id)->param('tripId', $tripId)
             ->button('✅Прибыл по адресу')->action('arrivedToAddress')->param('addressId', $address->id)->param('tripId', $tripId)
-            ->button('✅Убыл по адресу')->action('leftAtTheAddress')->param('addressId', $address->id)->param('tripId', $tripId)
-            ->button('✅Список клиентов по указанному адресу')->action('getClientList')->param('addressId', $address->id)->param('tripId', $tripId);
+            ->button('✅Список клиентов по указанному адресу')->action('getClientList')->param('addressId', $address->id)->param('tripId', $tripId)
+            ->button('❌ Назад')->action('getAddressList')->param('tripId', $tripId);
     }
 
 }

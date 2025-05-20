@@ -6,14 +6,16 @@ use App\DTO\GetTaskDTO;
 use App\Http\Services\ExpeditorApiService;
 use App\Http\Telegraph\Keyboards\CompleteTaskKeyboard;
 use App\Http\Telegraph\Keyboards\FinishTaskKeyboard;
+use App\Models\Telegraph\TelegraphUserLocation;
 use DefStudio\Telegraph\Facades\Telegraph;
 
 class FinishTask
 {
     private ExpeditorApiService $expeditorApiService;
-
+    private int $userId;
     public function __construct(int $userId)
     {
+        $this->userId = $userId;
         $this->expeditorApiService = new ExpeditorApiService($userId);
     }
     public function handle(string $tripId)
@@ -27,17 +29,21 @@ class FinishTask
 
     public function arrivedToUnload(string $tripId)
     {
-        $this->expeditorApiService->arrivedToUnload($tripId);
+        $this->expeditorApiService->arrivedToUnload($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon);
     }
     public function completeDelivery(string $tripId)
     {
-        $this->expeditorApiService->completeDelivery($tripId);
+        $this->expeditorApiService->completeDelivery($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon);
     }
     public function submitVehicleAndDocuments(string $tripId)
     {
-        $this->expeditorApiService->submitVehicleAndDocuments($tripId);
+        $this->expeditorApiService->submitVehicleAndDocuments($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon);
     }
 
+    private function getLocation()
+    {
+        return TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
+    }
 
     private function formatTripDetails(GetTaskDTO $trip): string
     {

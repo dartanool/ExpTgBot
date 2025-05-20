@@ -17,12 +17,13 @@ class WarehouseAcceptance
         $this->userId = $userId;
         $this->expeditorApiService = new ExpeditorApiService($userId);
     }
-    public function handle(string $tripId)
+    public function handle(int $messageId, string $tripId)
     {
         $this->expeditorApiService->acceptanceFromWarehouse($tripId);
 
         $response = $this->expeditorApiService->getTaskList();
         $trip = $this->expeditorApiService->getTripById($tripId, $response->trips);
+        Telegraph::deleteMessage($messageId)->send();
 
         Telegraph::message($this->formatTripDetails($trip))->keyboard(TaskListKeyboard::createDetailsKeyboard($trip))
             ->send();

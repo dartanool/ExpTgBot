@@ -26,7 +26,7 @@ class TaskListKeyboard
         }
 
         // Добавляем кнопку "Отмена"
-        $keyboard->button('❌ Отмена')->action('cancel_trips');
+        $keyboard->button('')->action('cancel_trips');
 
         return $keyboard;
     }
@@ -38,6 +38,7 @@ class TaskListKeyboard
             ->button('✅ Груз погружен')->action('completeAcceptation')->param('tripId', $trip->id)
             ->button('📍 Отмена события')->action('cancelEvent')->param('tripId', $trip->id)
             ->button('📍 Перемещение отправления на ТС по поручению  ')->action('moveByOrder')->param('tripId', $trip->id)
-            ->button('🔙 Окончил приём')->action('finishAcceptation')->param('tripId', $trip->id)    ;
+            ->button('🔙 Окончил приём')->action('finishAcceptation')->param('tripId', $trip->id)
+            ->button('❌ Назад')->action('selectTrip')->param('tripId', $trip->id);
     }
 }

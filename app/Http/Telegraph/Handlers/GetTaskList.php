@@ -22,7 +22,7 @@ class GetTaskList
     public function handle()
     {
         $response = $this->expeditorApiService->getTaskList();
-        Telegraph::message('Вот ваш список')->keyboard(TaskListKeyboard::handle($response->trips))->send();
+        Telegraph::message('Список текущих и плановых заданий:')->keyboard(TaskListKeyboard::handle($response->trips))->send();
     }
     /**
      * @throws \Exception

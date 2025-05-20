@@ -14,6 +14,6 @@ class StartKeyboard
                 Button::make('🔐 Авторизация')->action('auth'),
                 Button::make('ℹ️ Помощь')->action('help'),
             ])
-            ->chunk(2); // Разбиваем на 2 кнопки в ряд
+            ->chunk(2);
     }
 }
