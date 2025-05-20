@@ -183,7 +183,7 @@ class ExpeditorApiService
 
         $response = $this->expeditorClient->send($this->method, $data);
 
-        return (int) ($response['result'][0]['ID_KG'] ?? 0);
+        return ($response['result'][0]['ID_KG'] ?? null);
 
     }
 
@@ -203,7 +203,7 @@ class ExpeditorApiService
 
         $response = $this->expeditorClient->send($this->method, $data);
 
-        return (int) ($response['result'][0]['ID_MST'] ?? 0);
+        return ($response['result'][0]['ID_MST'] ?? null);
 
     }
 
@@ -216,7 +216,8 @@ class ExpeditorApiService
             'mst' => "$stationId"
         ];
 
-        return $this->expeditorClient->returnJson($method, $data);
+        $response = $this->expeditorClient->send($method, $data);
+        return $response['id_mst'] ?? null;
     }
 
     public function getTaskList() : GetTasksListDTO

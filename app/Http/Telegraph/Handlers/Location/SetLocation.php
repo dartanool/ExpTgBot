@@ -11,10 +11,8 @@ class SetLocation
     private int $chatId;
     private ExpeditorApiService $expeditorApiService;
 
-
     public function __construct(int $chatId)
     {
-
         $this->expeditorApiService = new ExpeditorApiService($chatId);
         $this->chatId = $chatId;
     }
@@ -31,13 +29,14 @@ class SetLocation
     {
         $cityId = $this->expeditorApiService->getCityId($city);
 
-        if ($cityId) {
+        if (isset($cityId)) {
             TelegraphUserState::query()->updateOrCreate(
                 ['user_id' => $this->chatId],
                 ['state' => 'awaiting_station', 'data' => $cityId]
             );
-
             Telegraph::message('Введите станцию. Пример: Курская')->send();
+        } else {
+            Telegraph::message('Не нашли город. Повторите ввод города. Пример: Москва')->send();
         }
     }
 }

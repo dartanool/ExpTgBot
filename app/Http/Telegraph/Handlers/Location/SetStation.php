@@ -5,6 +5,7 @@ namespace App\Http\Telegraph\Handlers\Location;
 use App\Http\Services\ExpeditorApiService;
 use App\Models\Telegraph\TelegraphUserLocation;
 use App\Models\Telegraph\TelegraphUserState;
+use DefStudio\Telegraph\Facades\Telegraph;
 
 class SetStation
 {
@@ -24,8 +25,7 @@ class SetStation
 
         $stationId = $this->expeditorApiService->getStationId($station, $cityId);
 
-        if ($stationId) {
-
+        if (isset($stationId)) {
             $this->setUserStation->handle($stationId);
 
             TelegraphUserLocation::query()->updateOrCreate([
@@ -35,7 +35,8 @@ class SetStation
             ]);
 
             TelegraphUserState::where('user_id', $this->chatId)->delete();
-
+        } else {
+            Telegraph::message('Не нашли станцию. Повторите ввод города. Пример: Курская')->send();
 
         }
 

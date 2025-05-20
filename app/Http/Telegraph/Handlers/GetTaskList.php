@@ -27,8 +27,9 @@ class GetTaskList
     /**
      * @throws \Exception
      */
-    public function selectTrip(string $tripId): void
+    public function selectTrip(int $messageId, string $tripId): void
     {
+        Telegraph::deleteMessage($messageId)->send();
         $response = $this->expeditorApiService->getTaskList();
         $trip = $this->expeditorApiService->getTripById($tripId, $response->trips);
 

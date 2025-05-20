@@ -8,7 +8,7 @@ use DefStudio\Telegraph\Keyboard\Keyboard;
 
 class ClientKeyboard
 {
-    public static function handle(array $clients, string $addressId)
+    public static function handle(array $clients, string $addressId, string $tripId)
     {
         $keyboard = Keyboard::make();
 
@@ -25,7 +25,9 @@ class ClientKeyboard
         }
 
         // Добавляем кнопку "Отмена"
-        $keyboard->button('❌ Отмена')->action('cancel_trips');
+        $keyboard->button('❌ Отмена')->action('selectAddress')
+                ->param('addressId', $addressId)
+        ->param('tripId', $tripId);
 
         return $keyboard;
     }

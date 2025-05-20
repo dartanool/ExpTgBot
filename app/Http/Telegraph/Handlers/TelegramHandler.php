@@ -47,7 +47,7 @@ class TelegramHandler extends WebhookHandler
     }
     public function selectTrip()
     {
-        (new GetTaskList($this->getUserId()))->selectTrip($this->data->get('tripId'));
+        (new GetTaskList($this->getUserId()))->selectTrip($this->messageId, $this->data->get('tripId'));
 
     }
 //ПРИЁМ СО СКЛАДА

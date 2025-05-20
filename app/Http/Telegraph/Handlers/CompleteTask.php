@@ -40,7 +40,7 @@ class CompleteTask
         $response = $this->expeditorApiService->getAddressList($tripId);
         Telegraph::deleteMessage($messageId)->send();
 
-        Telegraph::message('Список адресов')->keyboard(AddressKeyboard::show($response->addresses, $tripId))->send();
+        Telegraph::message("Список адресов по заданию: $tripId")->keyboard(AddressKeyboard::show($response->addresses, $tripId))->send();
     }
 
     /**
@@ -74,8 +74,8 @@ class CompleteTask
         $address = $this->expeditorApiService->getAddressByAddressIdTripId($addressId, $tripId);
 
         $clientList = $this->expeditorApiService->getClientList($tripId, $address->address);
-        Telegraph::message('Список клиентов по д')->send();
-        Telegraph::message('Список клиентов по данному адресу')->keyboard(ClientKeyboard::handle($clientList->clients, $addressId))->send();
+
+        Telegraph::message("Список клиентов по адресу: $address->address")->keyboard(ClientKeyboard::handle($clientList->clients, $addressId, $tripId))->send();
 
     }
 

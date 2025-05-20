@@ -27,7 +27,7 @@ class AddressKeyboard
         }
 
         // Добавляем кнопку "Отмена"
-        $keyboard->button('❌ Отмена')->action('getAddressList')->param('tripId', $tripId);
+//        $keyboard->button('❌ Отмена')->action('getAddressList')->param('tripId', $tripId);
 
         return $keyboard;
     }

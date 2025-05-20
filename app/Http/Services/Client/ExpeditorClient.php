@@ -16,27 +16,6 @@ class ExpeditorClient
         $this->baseUrl = env('API_BASE_URL');
     }
 
-    public function returnJson(string $method, array $data)
-    {
-        $response = Http::withHeaders([
-            'Authorization' => 'Basic '. $this->apiToken,
-            'Content-Type' => 'application/json',
-        ])->post($this->baseUrl.$method, $data);
-
-        Log::debug('API Response', [
-//            'method' => $method,
-            'status' => $response->status(),
-//            'headers' => $response->headers(),
-            'body' => $response->body()
-        ]);
-
-        if ($response->status() == 200)
-        {
-            return $response->json();
-        }
-        return $response;
-    }
-
     public function send(string $method, array $data)
     {
         $response = Http::withHeaders([
