@@ -164,7 +164,8 @@ class ExpeditorApiService
         $method ='GetSession';
         $response = $this->expeditorClient->send($method, $data);
 
-        return $response['Pragma'];
+
+        return $response['Pragma'] ?? null;
     }
 
     public function getCityId(string $city)

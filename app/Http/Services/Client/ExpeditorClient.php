@@ -30,6 +30,10 @@ class ExpeditorClient
             'body' => $response->body()
         ]);
 
+        if ($response->status() == 200)
+        {
+            return $response->json();
+        }
         return $response;
     }
 
@@ -49,9 +53,10 @@ class ExpeditorClient
             'body' => $response->body()
         ]);
 
-        if ($response->status() == 200)
-        {
+        if ($response->successful()) { // проверяет статус 200-299
             return $response->json();
+        } else {
+            return null;
         }
     }
 

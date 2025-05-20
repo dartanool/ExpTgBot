@@ -20,7 +20,7 @@ class CompleteAuthHandler
     {
         $token = $this->expeditorApiService->getSession($login, $password);
 
-        if ($token) {
+        if (isset($token)) {
             Telegraph::message("Вы успешно авторизовались")->replyKeyboard(MainKeyboard::handle())->send();
 
             TelegraphUsers::updateOrCreate(
@@ -29,6 +29,9 @@ class CompleteAuthHandler
             );
 
             TelegraphUserState::where('user_id', $this->chatId)->delete();
+        } else {
+            Telegraph::message("Повторите регистрацию")->send();
+
         }
     }
 }
