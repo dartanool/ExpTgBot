@@ -21,7 +21,7 @@ class SetUserStation
         {
             Telegraph::message("Станция успешно установлена")->send();
         } else {
-            Telegraph::message("Проищошла ошибка. Повторите установку станции.")->send();
+//            Telegraph::message("Проищошла ошибка. Повторите установку станции.")->send();
 
         }
     }

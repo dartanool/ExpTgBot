@@ -7,6 +7,7 @@ use App\Http\Services\ExpeditorApiService;
 use App\Http\Telegraph\Keyboards\ActionKeyboard;
 use App\Http\Telegraph\Keyboards\MainKeyboard;
 use App\Http\Telegraph\Keyboards\TaskListKeyboard;
+use App\Models\Telegraph\TelegraphUserLocation;
 use DefStudio\Telegraph\DTO\Message;
 use \DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphChat;
@@ -14,9 +15,11 @@ use DefStudio\Telegraph\Models\TelegraphChat;
 class GetTaskList
 {
     private ExpeditorApiService $expeditorApiService;
+    private int $chatId;
 
     public function __construct(int $chatId)
     {
+        $this->chatId = $chatId;
         $this->expeditorApiService = new ExpeditorApiService($chatId);
     }
     public function handle()
@@ -32,6 +35,9 @@ class GetTaskList
         Telegraph::deleteMessage($messageId)->send();
         $response = $this->expeditorApiService->getTaskList();
         $trip = $this->expeditorApiService->getTripById($tripId, $response->trips);
+
+        $location = TelegraphUserLocation::query()->where('user_id', $this->chatId)->first();
+        $this->expeditorApiService->markAsRead($tripId, $location->event_lat, $location->event_lon);
 
         Telegraph::message($this->formatTripDetails($trip))->keyboard(ActionKeyboard::handle($tripId))->send();
 

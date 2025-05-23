@@ -8,6 +8,8 @@ use App\DTO\GetClientDTO;
 use App\DTO\GetClientListDTO;
 use App\DTO\GetTaskDTO;
 use App\DTO\GetTasksListDTO;
+use App\DTO\GetTtnTripDTO;
+use App\DTO\GetTtnTripListDTO;
 use App\Http\Services\Client\ExpeditorClient;
 use App\Models\Telegraph\TelegraphUsers;
 use DefStudio\Telegraph\Facades\Telegraph;
@@ -16,25 +18,15 @@ class ExpeditorApiService
 {
 
     protected ExpeditorClient $expeditorClient;
-    private string $userId;
     private string $method;
 
     public function __construct(int $userId)
     {
-        $this->expeditorClient = new ExpeditorClient();
+        $this->expeditorClient = new ExpeditorClient($userId);
         $this->method = 'rt';
-        $this->userId = $userId;
     }
 
-    public function getToken()
-    {
-        $token = TelegraphUsers::query()->where('user_id', $this->userId)->first()->token;
-        if (isset($token)) {
-            return $token;
-        } else {
-            return null;
-        }
-    }
+
 
     public function parseApiResponse(array $apiResponse): GetTasksListDTO
     {
@@ -110,6 +102,42 @@ class ExpeditorApiService
         );
     }
 
+    public function parseTtnApiResponse(array $apiResponse): GetTtnTripListDTO
+    {
+        $ttns = [];
+        $count = 1;
+        foreach ($apiResponse['result'] as $item) {
+            $ttns[] = new GetTtnTripDTO(
+                id: $count,
+                idAexTtnTrip: $item['ID_AEX_TTNTRIP'],
+                aexTtnTripIdRec:$item['AEX_TTNTRIP_ID_REC'],
+                aexoTel: $item['AEXO_TEL'],
+                idS72: $item['ID_S72'],
+                prchVes: (float)$item['PRCH_VES'],
+                prchObyom: (float)str_replace(',', '.', $item['PRCH_OBYOM']),
+                prchCliMest:(int)$item['PRCH_CLI_MEST'],
+                prchBagMest:(int)$item['PRCH_BAG_MEST'],
+                prchStrNom: $item['PRCH_STR_NOM'],
+            );
+            $count++;
+        }
+
+        return new GetTtnTripListDTO(
+            success: $apiResponse['result'] === '1',
+            trips: $ttns,
+        );
+    }
+
+    public function getTtnTripById(int $ttnTripId, array $ttns)
+    {
+        foreach ($ttns as $ttn) {
+            if ($ttn->id === $ttnTripId) {
+                return $ttn;
+            }
+        }
+        throw new \Exception("Задание не найдено");
+    }
+
     public function getTripById(string $tripId, array $trips): GetTaskDTO
     {
         foreach ($trips as $trip) {
@@ -162,7 +190,7 @@ class ExpeditorApiService
         ];
 
         $method ='GetSession';
-        $response = $this->expeditorClient->send($method, $data);
+        $response = $this->expeditorClient->auth($method, $data);
 
 
         return $response['Pragma'] ?? null;
@@ -171,7 +199,6 @@ class ExpeditorApiService
     public function getCityId(string $city)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             'init' => [
                 'type' => 'data',
                 'report' => 'te.kg.r'
@@ -190,7 +217,6 @@ class ExpeditorApiService
     public function getStationId(string $station, string $cityId)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             'init' => [
                 'type' => 'data',
                 'report' => 'te.mst.r'
@@ -212,7 +238,6 @@ class ExpeditorApiService
         $method = 'SetUserMst';
 
         $data = [
-            'Pragma' => "{$this->getToken()}",
             'mst' => "$stationId"
         ];
 
@@ -223,7 +248,6 @@ class ExpeditorApiService
     public function getTaskList() : GetTasksListDTO
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             'init' => [
                 'type' => 'data',
                 'report' => 'te.trips.r'
@@ -237,7 +261,6 @@ class ExpeditorApiService
     public function getCurrentTask(int $cityId)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             'init' => [
                 'type' => 'data',
                 'report' => 'te.trip.r'
@@ -257,7 +280,6 @@ class ExpeditorApiService
     public function acceptanceFromWarehouse(string $tripId)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.ttnList.r"
@@ -267,12 +289,13 @@ class ExpeditorApiService
             ]
         ];
 
-        return $this->expeditorClient->send($this->method, $data);
+        $response = $this->expeditorClient->send($this->method, $data);
+
+        return $this->parseTtnApiResponse($response);
     }
     public function markAsRead(string $tripId, string $eventLat, string $eventLon)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.event.w"
@@ -291,14 +314,13 @@ class ExpeditorApiService
     public function moveByOrder(string $tripId, string $eventLat, string $eventLon)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.event.w"
             ],
             "params" => [
                 "eventCode" => "st.2.72.0",
-                "eventIdTrip" => $tripId,
+                "eventIdTtnTrip" => $tripId,
                 "eventLat" => $eventLat,
                 "eventLon" => $eventLon,
             ]
@@ -306,10 +328,9 @@ class ExpeditorApiService
 
         return $this->expeditorClient->send($this->method, $data);
     }
-    public function completeAcceptation(string $tripId)
+    public function completeAcceptation(string $tripId, int $ttnTripId, string $eventLat, string $eventLon)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.event.w"
@@ -317,6 +338,10 @@ class ExpeditorApiService
             "params" => [
                 "eventCode" => "st.2.72.0",
                 "eventIdTrip" => $tripId,
+                "eventIdTtnTrip" => $ttnTripId,
+                "eventLat" => $eventLat,
+                "eventLon" => $eventLon,
+                "eventAddr"
             ]
         ];
 
@@ -326,7 +351,6 @@ class ExpeditorApiService
     public function cancelEvent(string $tripId)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.eventDel.w"
@@ -339,17 +363,18 @@ class ExpeditorApiService
         return $this->expeditorClient->send($this->method, $data);
     }
 
-    public function finishAcceptation(string $tripId)
+    public function finishAcceptation(string $tripId, string $eventLat, string $eventLon)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.eventDel.w"
             ],
             "params" => [
                 "eventCode" => "st.1.76.2",
-                "eventId" =>  $tripId,
+                "eventIdTrip" =>  $tripId,
+                "eventLat" => $eventLat,
+                "eventLon" => $eventLon
             ]
         ];
 
@@ -361,7 +386,6 @@ class ExpeditorApiService
     public function completeTask(string $tripId, string $eventLat, string $eventLon)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.event.w"
@@ -379,7 +403,6 @@ class ExpeditorApiService
     public function getAddressList(string $tripId)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.addrList.r"
@@ -399,7 +422,6 @@ class ExpeditorApiService
     public function arrivedToAddress(string $tripId, string $eventLat, string $eventLon, string $address)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.event.w"
@@ -418,7 +440,6 @@ class ExpeditorApiService
     public function leftAtAddress(string $tripId, string $eventLat, string $eventLon, string $address)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.event.w"
@@ -437,7 +458,6 @@ class ExpeditorApiService
     public function getClientList(string $tripId, string $address)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.addrClientList.r"
@@ -458,7 +478,6 @@ class ExpeditorApiService
     public function arrivedToUnload(string $tripId, string $eventLat, string $eventLon)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.event.w"
@@ -477,7 +496,6 @@ class ExpeditorApiService
     public function completeDelivery(string $tripId, string $eventLat, string $eventLon)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.event.w"
@@ -495,7 +513,6 @@ class ExpeditorApiService
     public function submitVehicleAndDocuments(string $tripId, string $eventLat, string $eventLon)
     {
         $data = [
-            'Pragma' => "{$this->getToken()}",
             "init" => [
                 "type" => "data",
                 "report" => "te.event.w"

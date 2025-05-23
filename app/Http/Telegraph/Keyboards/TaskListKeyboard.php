@@ -14,8 +14,9 @@ class TaskListKeyboard
 
         foreach($trips as $trip) {
             $buttonText = sprintf(
-                "🚛 %s | %s-%s | %s",
-                $trip->id,
+                "🚛  %s-%s | %s-%s | %s",
+                date('d.m', strtotime($trip->startDate)),
+                date('d.m', strtotime($trip->endDate)),
                 date('H:i', strtotime($trip->startDate)),
                 date('H:i', strtotime($trip->endDate)),
                 $trip->cityName);
@@ -34,7 +35,6 @@ class TaskListKeyboard
     public static function createDetailsKeyboard(GetTaskDTO $trip): Keyboard
     {
         return Keyboard::make()
-            ->button('✅ Ознакомлен с заданием')->action('markAsRead')->param('tripId', $trip->id)
             ->button('✅ Груз погружен')->action('completeAcceptation')->param('tripId', $trip->id)
             ->button('📍 Отмена события')->action('cancelEvent')->param('tripId', $trip->id)
             ->button('📍 Перемещение отправления на ТС по поручению  ')->action('moveByOrder')->param('tripId', $trip->id)

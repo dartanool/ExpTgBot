@@ -3,6 +3,7 @@
 namespace App\Http\Telegraph\Handlers\Location;
 
 use App\Http\Services\ExpeditorApiService;
+use App\Models\Telegraph\TelegraphUserLocation;
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
 
@@ -15,6 +16,16 @@ class SetLocation
     {
         $this->expeditorApiService = new ExpeditorApiService($chatId);
         $this->chatId = $chatId;
+    }
+    public function handleLocation($location): void
+    {
+        TelegraphUserLocation::query()->where('user_id', $this->chatId)->update(
+            [
+                'event_lat' => $location->latitude(),
+                'event_lon' => $location->longitude()
+            ]
+        );
+
     }
     public function location()
     {

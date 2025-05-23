@@ -48,7 +48,6 @@ class TelegramHandler extends WebhookHandler
     public function selectTrip()
     {
         (new GetTaskList($this->getUserId()))->selectTrip($this->messageId, $this->data->get('tripId'));
-
     }
 //ПРИЁМ СО СКЛАДА
 
@@ -56,21 +55,20 @@ class TelegramHandler extends WebhookHandler
     {
         (new WarehouseAcceptance($this->getUserId()))->handle($this->messageId, $this->data->get('tripId'));
     }
-    public function markAsRead()
+
+    public function selectTtnTrip()
     {
-        (new WarehouseAcceptance($this->getUserId()))->markAsRead($this->data->get('tripId'));
+        (new WarehouseAcceptance($this->getUserId()))->selectTtnTrip($this->messageId, $this->data->get('ttnId'), $this->data->get('tripId'));
 
     }
     public function moveByOrder()
     {
-        (new WarehouseAcceptance($this->getUserId()))->moveByOrder($this->data->get('tripId'));
-
+        (new WarehouseAcceptance($this->getUserId()))->moveByOrder($this->data->get('tripId'),  $this->data->get('ttnTripId'));
     }
     //
     public function completeAcceptation()
     {
-
-        (new WarehouseAcceptance($this->getUserId()))->completeAcceptation($this->data->get('tripId'));
+        (new WarehouseAcceptance($this->getUserId()))->completeAcceptation($this->data->get('tripId'), $this->data->get('ttnTripId'));
     }
 
     public function cancelEvent()
@@ -139,12 +137,12 @@ class TelegramHandler extends WebhookHandler
 
     public function handleChatMessage(Stringable $text): void
     {
+        $userId =$this->getUserId();
 
         if ($this->message->location()) {
-            $this->handleLocation();
+            (new SetLocation($userId))->handleLocation($this->message->location());
         }
 
-        $userId =$this->getUserId();
         $userState = TelegraphUserState::query()->where('user_id', $userId)->first();
 
         if ($userState){
@@ -177,20 +175,7 @@ class TelegramHandler extends WebhookHandler
 
 
 
-    public function handleLocation(): void
-    {
-        $userId = $this->getUserId();
 
-        $location = $this->message->location();
-
-        TelegraphUserLocation::query()->where('user_id', $userId)->update(
-            [
-                'event_lat' => $location->latitude(),
-                'event_lon' => $location->longitude()
-            ]
-        );
-
-    }
 
 
 

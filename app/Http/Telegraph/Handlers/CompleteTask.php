@@ -26,6 +26,7 @@ class CompleteTask
     public function handle(string $tripId)
     {
         $location = TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
+        // Проверка на наличие долготы и широты
         $this->expeditorApiService->completeTask($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon);
 
         $response = $this->expeditorApiService->getTaskList();
