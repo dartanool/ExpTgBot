@@ -25,13 +25,10 @@ class CompleteTask
 
     public function handle(string $tripId)
     {
-        $location = TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
-        // Проверка на наличие долготы и широты
         $this->expeditorApiService->completeTask($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon);
 
         $response = $this->expeditorApiService->getTaskList();
         $trip = $this->expeditorApiService->getTripById($tripId, $response->trips);
-
         Telegraph::message($this->formatTripDetails($trip))->keyboard(CompleteTaskKeyboard::createDetailsKeyboard($trip))
             ->send();
     }
@@ -56,7 +53,6 @@ class CompleteTask
     }
     public function leftAtAddress(string $addressId, string $tripId)
     {
-
         $address = $this->expeditorApiService->getAddressByAddressIdTripId($addressId, $tripId);
 
         $this->expeditorApiService->leftAtAddress($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon,$address->address);
@@ -67,8 +63,6 @@ class CompleteTask
 
         $this->expeditorApiService->arrivedToAddress($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon, $address->address);
     }
-
-
 
     public function getClientListByAddress(string $addressId, string $tripId)
     {

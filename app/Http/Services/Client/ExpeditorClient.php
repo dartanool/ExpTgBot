@@ -25,12 +25,9 @@ class ExpeditorClient
             'Content-Type' => 'application/json',
         ])->post($this->baseUrl.$method, $data);
 
-
         // Логирование полного ответа
         Log::debug('API Response', [
-//            'method' => $method,
             'status' => $response->status(),
-//            'headers' => $response->headers(),
             'body' => $response->body()
         ]);
 

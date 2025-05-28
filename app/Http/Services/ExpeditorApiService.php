@@ -26,8 +26,6 @@ class ExpeditorApiService
         $this->method = 'rt';
     }
 
-
-
     public function parseApiResponse(array $apiResponse): GetTasksListDTO
     {
         $trips = [];
@@ -311,7 +309,7 @@ class ExpeditorApiService
         return $this->expeditorClient->send($this->method, $data);
     }
 
-    public function moveByOrder(string $tripId, string $eventLat, string $eventLon)
+    public function moveByOrder(string $tripId, string $ttnTripId, string $eventLat, string $eventLon)
     {
         $data = [
             "init" => [
@@ -320,7 +318,7 @@ class ExpeditorApiService
             ],
             "params" => [
                 "eventCode" => "st.2.72.0",
-                "eventIdTtnTrip" => $tripId,
+                "eventIdTrip" => 2252182255931561,
                 "eventLat" => $eventLat,
                 "eventLon" => $eventLon,
             ]

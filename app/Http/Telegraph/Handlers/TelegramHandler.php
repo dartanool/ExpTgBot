@@ -11,12 +11,23 @@ use App\Models\Telegraph\TelegraphUserLocation;
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Stringable;
 
 
 class TelegramHandler extends WebhookHandler
 {
+
+    public SetLoginHandler $setLogin;
+    public SetPasswordHandler  $setPassword;
+    public function __construct()
+    {
+        parent::__construct();
+        $this->setLogin = new SetLoginHandler($this->chat);
+        $this->setPassword = new SetPasswordHandler($this->chat);
+
+    }
 
     protected function getUserId()
     {
@@ -25,8 +36,11 @@ class TelegramHandler extends WebhookHandler
 
     public function start(): void
     {
-        Telegraph::message('Добро пожаловать. Вам необходимо авторизоваться.')
-            ->keyboard(StartKeyboard::handle())->send();
+        Log::info('Запрос',[
+            'chat_id' => $this->chat->id,
+            'chat' =>  $this->chat,
+        ]);
+        $this->chat->message('Добро пожаловать. Вам необходимо авторизоваться.')->keyboard(StartKeyboard::handle())->send();
     }
 
 
@@ -36,7 +50,7 @@ class TelegramHandler extends WebhookHandler
             ['user_id' => $this->getUserId()],
             ['state' => 'awaiting_login', 'data' => null]
         );
-        Telegraph::message(' Введите сначала логин. Пример: Иванов И.В.')->send();
+        $this->chat->message(' Введите сначала логин. Пример: Иванов И.В.')->send();
     }
 
 
@@ -148,10 +162,10 @@ class TelegramHandler extends WebhookHandler
         if ($userState){
             switch ($userState->state) {
                 case 'awaiting_login':
-                    (new SetLoginHandler())->handle($userId, $text->toString());
+                    $this->setLogin->handle($text->toString());
                     break;
                 case 'awaiting_password':
-                    (new SetPasswordHandler())->handle($userId, $text->toString());
+                    $this->setPassword->handle($text->toString());
                     break;
                 case 'awaiting_city':
                     Telegraph::message('password')->send();
@@ -172,13 +186,4 @@ class TelegramHandler extends WebhookHandler
                 break;
         }
     }
-
-
-
-
-
-
-
-
-
 }

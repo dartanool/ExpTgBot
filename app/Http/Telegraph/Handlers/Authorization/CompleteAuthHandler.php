@@ -6,31 +6,32 @@ use App\Http\Telegraph\Keyboards\MainKeyboard;
 use App\Models\Telegraph\TelegraphUserState;
 use App\Models\Telegraph\TelegraphUsers;
 use DefStudio\Telegraph\Facades\Telegraph;
+use DefStudio\Telegraph\Models\TelegraphChat;
 
 class CompleteAuthHandler
 {
     private ExpeditorApiService $expeditorApiService;
-    private int $chatId;
-    public function __construct(int $chatId)
+    private TelegraphChat $chat;
+    public function __construct(TelegraphChat $chat)
     {
-        $this->chatId = $chatId;
-        $this->expeditorApiService = new ExpeditorApiService($chatId);
+        $this->chat = $chat;
+        $this->expeditorApiService = new ExpeditorApiService($chat->chat_id);
     }
     public function handle(string $login, string $password): void
     {
         $token = $this->expeditorApiService->getSession($login, $password);
 
         if (isset($token)) {
-            Telegraph::message("Вы успешно авторизовались")->replyKeyboard(MainKeyboard::handle())->send();
+            $this->chat->message("Вы успешно авторизовались")->replyKeyboard(MainKeyboard::handle())->send();
 
             TelegraphUsers::updateOrCreate(
-                ['user_id' => $this->chatId],
+                ['user_id' => $this->chat->chat_id],
                 ['token' => $token]
             );
 
-            TelegraphUserState::where('user_id', $this->chatId)->delete();
+            TelegraphUserState::where('user_id', $this->chat->chat_id)->delete();
         } else {
-            Telegraph::message("Повторите регистрацию")->send();
+            $this->chat->message("Повторите регистрацию")->send();
 
         }
     }

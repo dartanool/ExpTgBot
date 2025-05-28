@@ -5,7 +5,6 @@ namespace App\Http\Telegraph\Handlers;
 use App\DTO\GetTaskDTO;
 use App\DTO\GetTtnTripDTO;
 use App\Http\Services\ExpeditorApiService;
-use App\Http\Telegraph\Keyboards\TaskListKeyboard;
 use App\Http\Telegraph\Keyboards\TtnsKeyboard;
 use App\Models\Telegraph\TelegraphUserLocation;
 use DefStudio\Telegraph\Facades\Telegraph;
@@ -38,18 +37,22 @@ class WarehouseAcceptance
     }
     public function moveByOrder(string $tripId, int $ttnTripId)
     {
+        $ttns = $this->expeditorApiService->acceptanceFromWarehouse($tripId);
+        $ttn = $this->expeditorApiService->getTtnTripById($ttnTripId, $ttns->trips);
+
         $location = TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
-        $this->expeditorApiService->moveByOrder($tripId, $ttnTripId, $location->event_lat, $location->event_lon);
+        $this->expeditorApiService->moveByOrder($tripId, $ttn->idAexTtnTrip, $location->event_lat, $location->event_lon);
     }
 
     public function completeAcceptation(string $tripId, int $ttnTripId)
     {
         Telegraph::message('Для создания события необходимо выполнить команду 📍 Отправить местоположение')->send();
-
         $location = TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
 
         if ($location->event_lat & $location->event_lon) {
-            $response = $this->expeditorApiService->completeAcceptation($tripId, $ttnTripId, $location->event_lat, $location->event_lon);
+            $ttns = $this->expeditorApiService->acceptanceFromWarehouse($tripId);
+            $ttn = $this->expeditorApiService->getTtnTripById($ttnTripId, $ttns->trips);
+            $response = $this->expeditorApiService->completeAcceptation($tripId, $ttn->idAexTtnTrip, $location->event_lat, $location->event_lon);
             Telegraph::message('lf')->send();
         } else {
             Telegraph::message('Необходимо выполнить команду 📍 Отправить местоположение')->send();
@@ -83,16 +86,16 @@ class WarehouseAcceptance
         return <<<TEXT
         🚛 *Детали задания #{$trip->id}*
 
-        *Машина:* {$trip->carNumber}
-        *Город:* {$trip->cityName}
-        *Время:* {$trip->startDate} - {$trip->endDate}
+        Машина: {$trip->carNumber}
+        Город: {$trip->cityName}
+        Время: {$trip->startDate} - {$trip->endDate}
 
-        *Статистика:*
+        Статистика:
         - Всего поручений: {$trip->totalTasks}
         - Доставка: {$trip->deliveryTasksCount} (Вес: {$trip->deliveryWeight} кг)
         - Забор: {$trip->pickupTasksCount} (Вес: {$trip->pickupWeight} кг)
 
-        *Статус:* {$this->getStatusText($trip)}
+        Статус: {$this->getStatusText($trip)}
         TEXT;
     }
     private function getStatusText(GetTaskDTO $trip): string
@@ -112,19 +115,19 @@ class WarehouseAcceptance
         $contactName = $contactParts[1] ?? 'не указано';
 
         return <<<TEXT
-            📦 *Детали поручения #{$trip->prchStrNom}*
+            📦 Детали поручения #{$trip->prchStrNom}
 
-            *ID поручения:* {$trip->idAexTtnTrip}
-            *ID заявки:* {$trip->aexTtnTripIdRec}
-            *ID события:* {$trip->idS72}
+            ID поручения: {$trip->idAexTtnTrip}
+            ID заявки: {$trip->aexTtnTripIdRec}
+            ID события: {$trip->idS72}
 
-            *Параметры груза:*
+            Параметры груза:
             - Вес: {$trip->prchVes} кг
             - Объем: {$trip->prchObyom} м³
             - Клиентские места: {$trip->prchCliMest}
             - Багажные места: {$trip->prchBagMest}
 
-            *Контактное лицо:*
+            Контактное лицо:
             - Телефон: {$phone}
             - Имя: {$contactName}
             TEXT;

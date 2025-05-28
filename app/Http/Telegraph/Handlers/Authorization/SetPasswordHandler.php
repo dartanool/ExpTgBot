@@ -4,14 +4,18 @@ namespace App\Http\Telegraph\Handlers\Authorization;
 
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
+use DefStudio\Telegraph\Models\TelegraphChat;
 
 class SetPasswordHandler
 {
-    public function handle(int $userId, string $password) : void
+    public TelegraphChat $chat;
+    public function __construct(TelegraphChat $chat){
+        $this->chat = $chat;
+    }
+    public function handle(string $password) : void
     {
+        $data = TelegraphUserState::query()->where('user_id', $this->chat->chat_id)->first();
 
-        $data = TelegraphUserState::query()->where('user_id', $userId)->first();
-
-        (new CompleteAuthHandler($userId))->handle($data->data, $password);
+        (new CompleteAuthHandler($this->chat))->handle($data->data, $password);
     }
 }
