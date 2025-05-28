@@ -11,16 +11,17 @@ use App\Http\Telegraph\Keyboards\ClientKeyboard;
 use App\Http\Telegraph\Keyboards\CompleteTaskKeyboard;
 use App\Models\Telegraph\TelegraphUserLocation;
 use DefStudio\Telegraph\Facades\Telegraph;
+use DefStudio\Telegraph\Models\TelegraphChat;
 
 class CompleteTask
 {
-    private int $userId;
+    private TelegraphChat $chat;
     private ExpeditorApiService $expeditorApiService;
 
-    public function __construct(int $userId)
+    public function __construct(TelegraphChat $chat)
     {
-        $this->userId = $userId;
-        $this->expeditorApiService = new ExpeditorApiService($userId);
+        $this->chat = $chat;
+        $this->expeditorApiService = new ExpeditorApiService($chat->chat_id);
     }
 
     public function handle(string $tripId)
@@ -29,16 +30,16 @@ class CompleteTask
 
         $response = $this->expeditorApiService->getTaskList();
         $trip = $this->expeditorApiService->getTripById($tripId, $response->trips);
-        Telegraph::message($this->formatTripDetails($trip))->keyboard(CompleteTaskKeyboard::createDetailsKeyboard($trip))
+        $this->chat->message($this->formatTripDetails($trip))->keyboard(CompleteTaskKeyboard::createDetailsKeyboard($trip))
             ->send();
     }
 
     public function getAddressList(int $messageId, string $tripId)
     {
         $response = $this->expeditorApiService->getAddressList($tripId);
-        Telegraph::deleteMessage($messageId)->send();
+        $this->chat->deleteMessage($messageId)->send();
 
-        Telegraph::message("Список адресов по заданию: $tripId")->keyboard(AddressKeyboard::show($response->addresses, $tripId))->send();
+        $this->chat->message("Список адресов по заданию: $tripId")->keyboard(AddressKeyboard::show($response->addresses, $tripId))->send();
     }
 
     /**
@@ -46,10 +47,10 @@ class CompleteTask
      */
     public function selectAddress(int $messageId,  string $addressId, string $tripId)
     {
-        Telegraph::deleteMessage($messageId)->send();
+        $this->chat->deleteMessage($messageId)->send();
 
         $address = $this->expeditorApiService->getAddressByAddressIdTripId($addressId, $tripId);
-        Telegraph::message($this->sendAddressCard($address))->keyboard(AddressKeyboard::createDetailsKeyboard($address, $tripId))->send();
+        $this->chat->message($this->sendAddressCard($address))->keyboard(AddressKeyboard::createDetailsKeyboard($address, $tripId))->send();
     }
     public function leftAtAddress(string $addressId, string $tripId)
     {
@@ -70,13 +71,13 @@ class CompleteTask
 
         $clientList = $this->expeditorApiService->getClientList($tripId, $address->address);
 
-        Telegraph::message("Список клиентов по адресу: $address->address")->keyboard(ClientKeyboard::handle($clientList->clients, $addressId, $tripId))->send();
+        $this->chat->message("Список клиентов по адресу: $address->address")->keyboard(ClientKeyboard::handle($clientList->clients, $addressId, $tripId))->send();
 
     }
 
     public function selectClient(string $clientName, string $addressId)
     {
-        $cityId = TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
+        $cityId = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
 
         $tripId = $this->expeditorApiService->getCurrentTask($cityId->city_id);
 
@@ -85,14 +86,14 @@ class CompleteTask
         $clients = $this->expeditorApiService->getClientList($tripId, $address->address);
         $client = $this->expeditorApiService->getClientByName($clientName, $clients->clients);
 
-        Telegraph::message($this->sendClientCard($client))->send();
+        $this->chat->message($this->sendClientCard($client))->send();
     }
 
 
 
     private function getLocation()
     {
-        return TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
+        return TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
     }
     private function formatTripDetails(GetTaskDTO $trip): string
     {

@@ -6,22 +6,23 @@ use App\Http\Services\ExpeditorApiService;
 use App\Models\Telegraph\TelegraphUserLocation;
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
+use DefStudio\Telegraph\Models\TelegraphChat;
 
 class SetStation
 {
-    private int $chatId;
+    private TelegraphChat $chat;
     private ExpeditorApiService $expeditorApiService;
     private SetUserStation $setUserStation;
 
-    public function __construct(int $chatId)
+    public function __construct(TelegraphChat $chat)
     {
-        $this->chatId = $chatId;
-        $this->expeditorApiService = new ExpeditorApiService($chatId);
-        $this->setUserStation = new SetUserStation($this->chatId);
+        $this->chat = $chat;
+        $this->expeditorApiService = new ExpeditorApiService($chat->chat_id);
+        $this->setUserStation = new SetUserStation($chat);
     }
     public function handle(string $station)
     {
-        $cityId = TelegraphUserState::query()->where('user_id', $this->chatId)->first()->data;
+        $cityId = TelegraphUserState::query()->where('user_id', $this->chat->chat_id)->first()->data;
 
         $stationId = $this->expeditorApiService->getStationId($station, $cityId);
 
@@ -29,14 +30,14 @@ class SetStation
             $this->setUserStation->handle($stationId);
 
             TelegraphUserLocation::query()->updateOrCreate([
-                'user_id' => $this->chatId,
+                'user_id' => $this->chat->chat_id,
                 'city_id' => $cityId,
                 'station_id' => $stationId,
             ]);
 
-            TelegraphUserState::where('user_id', $this->chatId)->delete();
+            TelegraphUserState::where('user_id', $this->chat->chat_id)->delete();
         } else {
-            Telegraph::message('Не нашли станцию. Повторите ввод города. Пример: Курская')->send();
+            $this->chat->message('Не нашли станцию. Повторите ввод города. Пример: Курская')->send();
 
         }
 

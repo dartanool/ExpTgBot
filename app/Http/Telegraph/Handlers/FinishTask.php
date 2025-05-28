@@ -8,22 +8,23 @@ use App\Http\Telegraph\Keyboards\CompleteTaskKeyboard;
 use App\Http\Telegraph\Keyboards\FinishTaskKeyboard;
 use App\Models\Telegraph\TelegraphUserLocation;
 use DefStudio\Telegraph\Facades\Telegraph;
+use DefStudio\Telegraph\Models\TelegraphChat;
 
 class FinishTask
 {
     private ExpeditorApiService $expeditorApiService;
-    private int $userId;
-    public function __construct(int $userId)
+    private TelegraphChat $chat;
+    public function __construct(TelegraphChat $chat)
     {
-        $this->userId = $userId;
-        $this->expeditorApiService = new ExpeditorApiService($userId);
+        $this->chat = $chat;
+        $this->expeditorApiService = new ExpeditorApiService($chat->chat_id);
     }
     public function handle(string $tripId)
     {
         $response = $this->expeditorApiService->getTaskList();
         $trip = $this->expeditorApiService->getTripById($tripId, $response->trips);
 
-        Telegraph::message($this->formatTripDetails($trip))->keyboard(FinishTaskKeyboard::handle($trip->id))
+        $this->chat->message($this->formatTripDetails($trip))->keyboard(FinishTaskKeyboard::handle($trip->id))
             ->send();
     }
 
@@ -42,7 +43,7 @@ class FinishTask
 
     private function getLocation()
     {
-        return TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
+        return TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
     }
 
     private function formatTripDetails(GetTaskDTO $trip): string

@@ -6,20 +6,21 @@ use App\Http\Services\ExpeditorApiService;
 use App\Models\Telegraph\TelegraphUserLocation;
 use App\Models\Telegraph\TelegraphUserState;
 use DefStudio\Telegraph\Facades\Telegraph;
+use DefStudio\Telegraph\Models\TelegraphChat;
 
 class SetLocation
 {
-    private int $chatId;
+    private TelegraphChat $chat;
     private ExpeditorApiService $expeditorApiService;
 
-    public function __construct(int $chatId)
+    public function __construct(TelegraphChat $chat)
     {
-        $this->expeditorApiService = new ExpeditorApiService($chatId);
-        $this->chatId = $chatId;
+        $this->expeditorApiService = new ExpeditorApiService($chat->chat_id);
+        $this->chat = $chat;
     }
     public function handleLocation($location): void
     {
-        TelegraphUserLocation::query()->where('user_id', $this->chatId)->update(
+        TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->update(
             [
                 'event_lat' => $location->latitude(),
                 'event_lon' => $location->longitude()
@@ -30,10 +31,11 @@ class SetLocation
     public function location()
     {
         TelegraphUserState::query()->updateOrCreate(
-            ['user_id' => $this->chatId],
+            ['user_id' => $this->chat->chat_id],
             ['state' => 'awaiting_city', 'data' => null]
         );
-        Telegraph::message('Введите сначала город. Пример: Москва')->send();
+        $this->chat->message('Введите сначала город. Пример: Москва')->send();
+//        Telegraph::message('')->send();
     }
 
     public function setCity(string $city)
@@ -42,12 +44,14 @@ class SetLocation
 
         if (isset($cityId)) {
             TelegraphUserState::query()->updateOrCreate(
-                ['user_id' => $this->chatId],
+                ['user_id' => $this->chat->chat_id],
                 ['state' => 'awaiting_station', 'data' => $cityId]
             );
-            Telegraph::message('Введите станцию. Пример: Курская')->send();
+            $this->chat->message('Введите станцию. Пример: Курская')->send();
+//            Telegraph::message('Введите станцию. Пример: Курская')->send();
         } else {
-            Telegraph::message('Не нашли город. Повторите ввод города. Пример: Москва')->send();
+            $this->chat->message('Не нашли город. Повторите ввод города. Пример: Москва')->send();
+//            Telegraph::message('')->send();
         }
     }
 }

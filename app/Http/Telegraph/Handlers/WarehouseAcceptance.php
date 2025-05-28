@@ -8,22 +8,23 @@ use App\Http\Services\ExpeditorApiService;
 use App\Http\Telegraph\Keyboards\TtnsKeyboard;
 use App\Models\Telegraph\TelegraphUserLocation;
 use DefStudio\Telegraph\Facades\Telegraph;
+use DefStudio\Telegraph\Models\TelegraphChat;
 
 class WarehouseAcceptance
 {
     private ExpeditorApiService $expeditorApiService;
-    private int $userId;
-    public function __construct(int $userId)
+    private TelegraphChat $chat;
+    public function __construct(TelegraphChat $chat)
     {
-        $this->userId = $userId;
-        $this->expeditorApiService = new ExpeditorApiService($userId);
+        $this->chat = $chat;
+        $this->expeditorApiService = new ExpeditorApiService($chat->chat_id);
     }
     public function handle(int $messageId, string $tripId)
     {
         $ttns = $this->expeditorApiService->acceptanceFromWarehouse($tripId);
-        Telegraph::deleteMessage($messageId)->send();
+        $this->chat->deleteMessage($messageId)->send();
 
-        Telegraph::message('ls')->keyboard(TtnsKeyboard::show($ttns->trips, $tripId))
+        $this->chat->message('ls')->keyboard(TtnsKeyboard::show($ttns->trips, $tripId))
             ->send();
     }
 
@@ -32,7 +33,7 @@ class WarehouseAcceptance
         $ttns = $this->expeditorApiService->acceptanceFromWarehouse($tripId);
         $ttn = $this->expeditorApiService->getTtnTripById($ttnId, $ttns->trips);
 
-        Telegraph::message($this->formatTtnTripDetails($ttn))->keyboard(TtnsKeyboard::createDetailsKeyboard($ttn, $tripId))
+        $this->chat->message($this->formatTtnTripDetails($ttn))->keyboard(TtnsKeyboard::createDetailsKeyboard($ttn, $tripId))
             ->send();
     }
     public function moveByOrder(string $tripId, int $ttnTripId)
@@ -40,44 +41,44 @@ class WarehouseAcceptance
         $ttns = $this->expeditorApiService->acceptanceFromWarehouse($tripId);
         $ttn = $this->expeditorApiService->getTtnTripById($ttnTripId, $ttns->trips);
 
-        $location = TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
+        $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
         $this->expeditorApiService->moveByOrder($tripId, $ttn->idAexTtnTrip, $location->event_lat, $location->event_lon);
     }
 
     public function completeAcceptation(string $tripId, int $ttnTripId)
     {
-        Telegraph::message('Для создания события необходимо выполнить команду 📍 Отправить местоположение')->send();
-        $location = TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
+        $this->chat->message('Для создания события необходимо выполнить команду 📍 Отправить местоположение')->send();
+        $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
 
         if ($location->event_lat & $location->event_lon) {
             $ttns = $this->expeditorApiService->acceptanceFromWarehouse($tripId);
             $ttn = $this->expeditorApiService->getTtnTripById($ttnTripId, $ttns->trips);
             $response = $this->expeditorApiService->completeAcceptation($tripId, $ttn->idAexTtnTrip, $location->event_lat, $location->event_lon);
-            Telegraph::message('lf')->send();
+            $this->chat->message('lf')->send();
         } else {
-            Telegraph::message('Необходимо выполнить команду 📍 Отправить местоположение')->send();
+            $this->chat->message('Необходимо выполнить команду 📍 Отправить местоположение')->send();
         }
     }
 
 
     public function cancelEvent(string $tripId)
     {
-        Telegraph::message('Cancel event')->send();
+        $this->chat->message('Cancel event')->send();
         $response = $this->expeditorApiService->cancelEvent($tripId);
     }
 
 
     public function finishAcceptation(string $tripId)
     {
-        $location = TelegraphUserLocation::query()->where('user_id', $this->userId)->first();
+        $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
 
         if ($location->event_lat & $location->event_lon) {
             $response = $this->expeditorApiService->finishAcceptation($tripId, $location->event_lat, $location->event_lon);
-            Telegraph::message('lf')->send();
+            $this->chat->message('lf')->send();
         } else {
-            Telegraph::message('Необходимо выполнить команду 📍 Отправить местоположение')->send();
+            $this->chat->message('Необходимо выполнить команду 📍 Отправить местоположение')->send();
         }
-        Telegraph::message('Finish acceptation')->send();
+        $this->chat->message('Finish acceptation')->send();
     }
 
 

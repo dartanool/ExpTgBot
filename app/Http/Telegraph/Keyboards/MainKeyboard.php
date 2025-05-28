@@ -12,7 +12,8 @@ class MainKeyboard
         return ReplyKeyboard::make()->buttons([
             ReplyButton::make('Установить станцию'),
             ReplyButton::make('Список заданий'),
-            ReplyButton::make('📍 Отправить местоположение')->requestLocation()
+            ReplyButton::make('📍 Отправить местоположение')->requestLocation(),
+            ReplyButton::make('Выйти')
             ]);
     }
 }

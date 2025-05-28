@@ -36,6 +36,6 @@ class TtnsKeyboard
             ->button('✅ Груз погружен')->action('completeAcceptation')->param('tripId', $tripId)->param('ttnTripId',$trip->id)
             ->button('📍 Перемещение отправления на ТС по поручению  ')->action('moveByOrder')->param('tripId', $tripId)->param('ttnTripId',$trip->id)
             ->button('🔙 Окончил приём')->action('finishAcceptation')->param('tripId', $tripId)
-            ->button('❌ Назад')->action('selectTrip')->action('selectTrip')->param('tripId', $tripId);
+            ->button('❌ Назад')->action('acceptanceFromWarehouse')->param('tripId', $tripId);
     }
 }

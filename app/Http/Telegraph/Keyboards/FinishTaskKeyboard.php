@@ -14,6 +14,8 @@ class FinishTaskKeyboard
                 Button::make('Прибыл для разгрузки')->action('arrivedToUnload')->param('tripId', $tripId),
                 Button::make('Окончил сдачу груза')->action('completeDelivery')->param('tripId', $tripId),
                 Button::make('Поставил ТС и сдал документы')->action('submitVehicleAndDocuments')->param('tripId', $tripId),
+                Button::make('❌ Назад')->action('showTripsList')
+
             ]);
     }
 }

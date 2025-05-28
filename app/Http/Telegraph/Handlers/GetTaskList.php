@@ -15,31 +15,32 @@ use DefStudio\Telegraph\Models\TelegraphChat;
 class GetTaskList
 {
     private ExpeditorApiService $expeditorApiService;
-    private int $chatId;
+    private TelegraphChat $chat;
 
-    public function __construct(int $chatId)
+    public function __construct(TelegraphChat $chat)
     {
-        $this->chatId = $chatId;
-        $this->expeditorApiService = new ExpeditorApiService($chatId);
+        $this->chat = $chat;
+        $this->expeditorApiService = new ExpeditorApiService($chat->chat_id);
     }
     public function handle()
     {
         $response = $this->expeditorApiService->getTaskList();
-        Telegraph::message('Список текущих и плановых заданий:')->keyboard(TaskListKeyboard::handle($response->trips))->send();
+        $this->chat->message('Список текущих и плановых заданий:')->keyboard(TaskListKeyboard::handle($response->trips))->send();
     }
     /**
      * @throws \Exception
      */
     public function selectTrip(int $messageId, string $tripId): void
     {
-        Telegraph::deleteMessage($messageId)->send();
+        $this->chat->deleteMessage($messageId)->send();
+//        Telegraph::deleteMessage($messageId)->send();
         $response = $this->expeditorApiService->getTaskList();
         $trip = $this->expeditorApiService->getTripById($tripId, $response->trips);
 
-        $location = TelegraphUserLocation::query()->where('user_id', $this->chatId)->first();
+        $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
         $this->expeditorApiService->markAsRead($tripId, $location->event_lat, $location->event_lon);
 
-        Telegraph::message($this->formatTripDetails($trip))->keyboard(ActionKeyboard::handle($tripId))->send();
+        $this->chat->message($this->formatTripDetails($trip))->keyboard(ActionKeyboard::handle($tripId))->send();
 
     }
 
