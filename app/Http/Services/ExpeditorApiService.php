@@ -57,6 +57,26 @@ class ExpeditorApiService
         );
     }
 
+    public function parseClientApiResponse(array $apiResponse): GetClientListDTO
+    {
+        $clients = [];
+        $count = 1;
+        foreach ($apiResponse['result'] as $item) {
+            $clients[] = new GetClientDTO(
+                id : $count,
+                clientName: $item['CLIENT'],
+                count: $item['CNT'],
+                type: $item['TIP_NAME'],
+            );
+            $count++;
+        }
+
+        return new GetClientListDTO(
+            success: $apiResponse['result'] === '1',
+            clients: $clients,
+        );
+    }
+
     public function parseAddressApiResponse(array $apiResponse): GetAddressListDTO
     {
         $addresses = [];
@@ -77,26 +97,6 @@ class ExpeditorApiService
         return new GetAddressListDTO(
             success: $apiResponse['result'] === '1',
             addresses: $addresses,
-        );
-    }
-
-    public function parseClientApiResponse(array $apiResponse): GetClientListDTO
-    {
-        $clients = [];
-        $count = 1;
-        foreach ($apiResponse['result'] as $item) {
-            $clients[] = new GetClientDTO(
-                id : $count,
-                clientName: $item['CLIENT'],
-                count: $item['CNT'],
-                type: $item['TIP_NAME'],
-            );
-            $count++;
-        }
-
-        return new GetClientListDTO(
-            success: $apiResponse['result'] === '1',
-            clients: $clients,
         );
     }
 
