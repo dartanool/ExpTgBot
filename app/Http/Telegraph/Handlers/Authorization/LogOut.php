@@ -15,9 +15,8 @@ class LogOut
     }
     public function handle()
     {
-        TelegraphUserLocation::query()->where('id',$this->chat->id)->delete();
-        TelegraphUsers::query()->where('id',$this->chat->id)->delete();
-        $keyboard = '';
+        TelegraphUserLocation::query()->where('user_id',$this->chat->chat_id)->delete();
+        TelegraphUsers::query()->where('user_id',$this->chat->chat_id)->delete();
         $this->chat->message('Вы вышли ')->removeReplyKeyboard()->send();
     }
 }

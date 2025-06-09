@@ -21,11 +21,11 @@ class SetUserStation
         $response = $this->expeditorApiService->setUserStation($stationId);
         $this->chat->message("Станция успешно установлена")->send();
 
-//        if (isset($response))
+//       if ($response->status() == 200)
 //        {
+//            Telegraph::message("Станция успешно установлена")->send();
 //        } else {
-////            Telegraph::message("Проищошла ошибка. Повторите установку станции.")->send();
-//
+//            Telegraph::message("Попробуйте еще раз установить станцию")->send();
 //        }
     }
 }
