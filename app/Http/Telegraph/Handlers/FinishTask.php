@@ -49,18 +49,18 @@ class FinishTask
     private function formatTripDetails(GetTaskDTO $trip): string
     {
         return <<<TEXT
-        🚛 *Детали задания #{$trip->id}*
+        🚛 Детали задания #{$trip->id}
 
-        *Машина:* {$trip->carNumber}
-        *Город:* {$trip->cityName}
-        *Время:* {$trip->startDate} - {$trip->endDate}
+        Машина: {$trip->carNumber}
+        Город: {$trip->cityName}
+        Время: {$trip->startDate} - {$trip->endDate}
 
-        *Статистика:*
+        Статистика:
         - Всего поручений: {$trip->totalTasks}
         - Доставка: {$trip->deliveryTasksCount} (Вес: {$trip->deliveryWeight} кг)
         - Забор: {$trip->pickupTasksCount} (Вес: {$trip->pickupWeight} кг)
 
-        *Статус:* {$this->getStatusText($trip)}
+        Статус: {$this->getStatusText($trip)}
         TEXT;
     }
 

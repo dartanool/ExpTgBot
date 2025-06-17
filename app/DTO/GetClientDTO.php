@@ -9,6 +9,5 @@ class GetClientDTO
         public readonly string $clientName,
         public readonly int $count,
         public readonly string $type,
-        // ... остальные поля
     ) {}
 }

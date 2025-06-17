@@ -5,7 +5,6 @@ use App\Http\Services\ExpeditorApiService;
 use App\Http\Telegraph\Keyboards\MainKeyboard;
 use App\Models\Telegraph\TelegraphUserState;
 use App\Models\Telegraph\TelegraphUsers;
-use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
 class CompleteAuthHandler

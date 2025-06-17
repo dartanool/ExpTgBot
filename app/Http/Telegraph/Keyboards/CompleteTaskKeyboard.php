@@ -24,9 +24,6 @@ class CompleteTaskKeyboard
                 ->param('tripId', $trip->id);
         }
 
-        // Добавляем кнопку "Отмена"
-//        $keyboard->button('❌ Отмена')->action('cancel_trips');
-
         return $keyboard;
     }
 

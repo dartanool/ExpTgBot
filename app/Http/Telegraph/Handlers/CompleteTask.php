@@ -10,7 +10,6 @@ use App\Http\Telegraph\Keyboards\AddressKeyboard;
 use App\Http\Telegraph\Keyboards\ClientKeyboard;
 use App\Http\Telegraph\Keyboards\CompleteTaskKeyboard;
 use App\Models\Telegraph\TelegraphUserLocation;
-use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
 class CompleteTask
@@ -98,18 +97,18 @@ class CompleteTask
     private function formatTripDetails(GetTaskDTO $trip): string
     {
         return <<<TEXT
-        🚛 *Детали задания #{$trip->id}*
+        🚛 Детали задания #{$trip->id}*
 
-        *Машина:* {$trip->carNumber}
-        *Город:* {$trip->cityName}
-        *Время:* {$trip->startDate} - {$trip->endDate}
+        Машина: {$trip->carNumber}
+        Город: {$trip->cityName}
+        Время: {$trip->startDate} - {$trip->endDate}
 
-        *Статистика:*
+        Статистика:
         - Всего поручений: {$trip->totalTasks}
         - Доставка: {$trip->deliveryTasksCount} (Вес: {$trip->deliveryWeight} кг)
         - Забор: {$trip->pickupTasksCount} (Вес: {$trip->pickupWeight} кг)
 
-        *Статус:* {$this->getStatusText($trip)}
+        Статус: {$this->getStatusText($trip)}
         TEXT;
     }
 
@@ -124,18 +123,18 @@ class CompleteTask
 
     protected function sendAddressCard(GetAddressDTO $address): string
     {
-       return "🏢 *Клиент:* {$address->clientName}\n"
-            . "📌 *Адрес:* {$address->address}\n"
-            . "🕒 *Часы работы:* {$address->workHours}\n"
+       return "🏢 Клиент: {$address->clientName}\n"
+            . "📌 Адрес: {$address->address}\n"
+            . "🕒 Часы работы: {$address->workHours}\n"
             . "📍 [Карта](https://yandex.ru/maps/?ll={$address->lon},{$address->lat})";
 
     }
 
     protected function sendClientCard(GetClientDTO $client): string
     {
-        return "🏢 *Клиент:* {$client->clientName}\n"
-            . "📌 *Количество поручений:* {$client->count}\n"
-            . "🕒 *Тип поручений:* {$client->type}\n";
+        return "🏢 Клиент: {$client->clientName}\n"
+            . "📌 Количество поручений: {$client->count}\n"
+            . "🕒 Тип поручений: {$client->type}\n";
 
     }
 }

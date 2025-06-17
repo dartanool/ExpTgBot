@@ -3,7 +3,6 @@
 namespace App\Http\Telegraph\Handlers\Authorization;
 
 use App\Models\Telegraph\TelegraphUserState;
-use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
 class SetPasswordHandler

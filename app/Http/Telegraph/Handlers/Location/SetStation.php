@@ -5,7 +5,6 @@ namespace App\Http\Telegraph\Handlers\Location;
 use App\Http\Services\ExpeditorApiService;
 use App\Models\Telegraph\TelegraphUserLocation;
 use App\Models\Telegraph\TelegraphUserState;
-use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
 class SetStation

@@ -11,6 +11,5 @@ class GetAddressDTO
         public readonly float $lon,
         public readonly string | null $workHours,
         public readonly string $clientName,
-        // ... остальные поля
     ) {}
 }

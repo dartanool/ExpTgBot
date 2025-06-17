@@ -7,7 +7,6 @@ use App\DTO\GetTtnTripDTO;
 use App\Http\Services\ExpeditorApiService;
 use App\Http\Telegraph\Keyboards\TtnsKeyboard;
 use App\Models\Telegraph\TelegraphUserLocation;
-use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
 class WarehouseAcceptance
@@ -24,7 +23,7 @@ class WarehouseAcceptance
         $ttns = $this->expeditorApiService->acceptanceFromWarehouse($tripId);
         $this->chat->deleteMessage($messageId)->send();
 
-        $this->chat->message('ls')->keyboard(TtnsKeyboard::show($ttns->trips, $tripId))
+        $this->chat->message("Список поручений по заданию {$tripId}")->keyboard(TtnsKeyboard::show($ttns->trips, $tripId))
             ->send();
     }
 
@@ -85,7 +84,7 @@ class WarehouseAcceptance
     private function formatTripDetails(GetTaskDTO $trip): string
     {
         return <<<TEXT
-        🚛 *Детали задания #{$trip->id}*
+        🚛 Детали задания #{$trip->id}
 
         Машина: {$trip->carNumber}
         Город: {$trip->cityName}

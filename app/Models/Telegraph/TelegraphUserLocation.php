@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 class TelegraphUserLocation extends Model
 {
-//    protected $table = 'telegraph_user_location';
     protected $fillable = [
         'user_id',
         'city_id',

@@ -2,8 +2,6 @@
 
 namespace App\Http\Telegraph\Keyboards;
 
-use App\Http\Telegraph\Handlers\CompleteTask;
-use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Keyboard\Keyboard;
 
 class ClientKeyboard

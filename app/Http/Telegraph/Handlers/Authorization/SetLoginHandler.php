@@ -2,9 +2,7 @@
 
 namespace App\Http\Telegraph\Handlers\Authorization;
 
-use App\Http\Services\TelegraphService;
 use App\Models\Telegraph\TelegraphUserState;
-use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
 class SetLoginHandler

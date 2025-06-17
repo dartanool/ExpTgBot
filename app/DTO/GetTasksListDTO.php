@@ -9,6 +9,4 @@ class GetTasksListDTO
         /** @var GetTaskDTO[] */
         public array $trips,
     ) {}
-
-
 }

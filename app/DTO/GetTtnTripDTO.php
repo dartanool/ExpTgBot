@@ -4,7 +4,6 @@ namespace App\DTO;
 
 class GetTtnTripDTO
 {
-
     public function __construct(
         public int $id,
         public string $idAexTtnTrip,

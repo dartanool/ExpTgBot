@@ -3,7 +3,6 @@
 namespace App\Http\Telegraph\Keyboards;
 
 use App\DTO\GetTaskDTO;
-use App\DTO\GetTasksListDTO;
 use DefStudio\Telegraph\Keyboard\Keyboard;
 
 class TaskListKeyboard

@@ -8,11 +8,8 @@ use App\Http\Telegraph\Handlers\Authorization\SetPasswordHandler;
 use App\Http\Telegraph\Handlers\Location\SetLocation;
 use App\Http\Telegraph\Handlers\Location\SetStation;
 use App\Http\Telegraph\Keyboards\StartKeyboard;
-use App\Models\Telegraph\TelegraphUserLocation;
 use App\Models\Telegraph\TelegraphUserState;
-use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Stringable;
 

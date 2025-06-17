@@ -3,7 +3,6 @@
 namespace App\Http\Telegraph\Handlers\Location;
 
 use App\Http\Services\ExpeditorApiService;
-use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
 class SetUserStation
@@ -23,9 +22,9 @@ class SetUserStation
 
 //       if ($response->status() == 200)
 //        {
-//            Telegraph::message("Станция успешно установлена")->send();
+//            $this->chat->message("Станция успешно установлена")->send();
 //        } else {
-//            Telegraph::message("Попробуйте еще раз установить станцию")->send();
+//           $this->chat->message("Попробуйте еще раз установить станцию")->send();
 //        }
     }
 }

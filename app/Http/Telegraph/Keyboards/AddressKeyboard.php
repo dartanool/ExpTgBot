@@ -3,8 +3,6 @@
 namespace App\Http\Telegraph\Keyboards;
 
 use App\DTO\GetAddressDTO;
-use App\DTO\GetTaskDTO;
-use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Keyboard\Keyboard;
 
 class AddressKeyboard
@@ -25,9 +23,6 @@ class AddressKeyboard
                 ->param('addressId', $address->id)
                 ->param('tripId', $tripId);
         }
-
-        // Добавляем кнопку "Отмена"
-//        $keyboard->button('❌ Отмена')->action('getAddressList')->param('tripId', $tripId);
 
         return $keyboard;
     }

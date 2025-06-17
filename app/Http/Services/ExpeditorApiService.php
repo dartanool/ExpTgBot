@@ -11,7 +11,6 @@ use App\DTO\GetTasksListDTO;
 use App\DTO\GetTtnTripDTO;
 use App\DTO\GetTtnTripListDTO;
 use App\Http\Services\Client\ExpeditorClient;
-use App\Models\Telegraph\TelegraphUsers;
 use DefStudio\Telegraph\Facades\Telegraph;
 
 class ExpeditorApiService

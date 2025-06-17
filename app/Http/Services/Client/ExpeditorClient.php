@@ -31,7 +31,7 @@ class ExpeditorClient
             'body' => $response->body()
         ]);
 
-        if ($response->successful()) { // проверяет статус 200-299
+        if ($response->successful()) {
             return $response->json();
         } else {
             return null;
@@ -51,7 +51,7 @@ class ExpeditorClient
             'body' => $response->body()
         ]);
 
-        if ($response->successful()) { // проверяет статус 200-299
+        if ($response->successful()) {
             return $response->json();
         } else {
             return null;
