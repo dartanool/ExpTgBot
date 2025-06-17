@@ -7,7 +7,7 @@ use DefStudio\Telegraph\Keyboard\Keyboard;
 use DefStudio\Telegraph\Keyboard\ReplyButton;
 use DefStudio\Telegraph\Keyboard\ReplyKeyboard;
 
-class ActionKeyboard
+class WarehouseActionKeyboard
 {
     public static function handle(string $tripId): Keyboard
     {

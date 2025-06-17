@@ -19,13 +19,14 @@ class FinishTask
         $this->chat = $chat;
         $this->expeditorApiService = new ExpeditorApiService($chat->chat_id);
     }
-    public function handle(string $tripId)
+    public function handle(int $messageId,string $tripId)
     {
+        $this->chat->deleteMessage($messageId)->send();
+
         $response = $this->expeditorApiService->getTaskList();
         $trip = $this->expeditorApiService->getTripById($tripId, $response->trips);
 
-        $this->chat->message($this->formatTripDetails($trip))->keyboard(FinishTaskKeyboard::handle($trip->id))
-            ->send();
+        $this->chat->message($this->formatTripDetails($trip))->keyboard(FinishTaskKeyboard::handle($trip->id))->send();
     }
 
     public function arrivedToUnload(string $tripId)

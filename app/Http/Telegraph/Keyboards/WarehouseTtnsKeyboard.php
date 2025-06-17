@@ -5,7 +5,7 @@ namespace App\Http\Telegraph\Keyboards;
 use App\DTO\GetTtnTripDTO;
 use DefStudio\Telegraph\Keyboard\Keyboard;
 
-class TtnsKeyboard
+class WarehouseTtnsKeyboard
 {
     public static function show(array $ttns, string $tripId)
     {
@@ -24,7 +24,7 @@ class TtnsKeyboard
         }
 
         // Добавляем кнопку "Отмена"
-        $keyboard->button('❌ Отмена')->action('selectTrip')->param('tripId', $tripId);
+        $keyboard->button('❌ Назад')->action('selectTrip')->param('tripId', $tripId);
 
         return $keyboard;
     }

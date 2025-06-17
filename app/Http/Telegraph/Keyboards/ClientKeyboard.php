@@ -23,9 +23,9 @@ class ClientKeyboard
         }
 
         // Добавляем кнопку "Отмена"
-        $keyboard->button('❌ Отмена')->action('selectAddress')
+        $keyboard->button('❌ Назад')->action('selectAddress')
                 ->param('addressId', $addressId)
-        ->param('tripId', $tripId);
+                ->param('tripId', $tripId);
 
         return $keyboard;
     }

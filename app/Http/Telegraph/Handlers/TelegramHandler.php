@@ -53,8 +53,6 @@ class TelegramHandler extends WebhookHandler
         ]);
         $this->chat->message('Добро пожаловать. Вам необходимо авторизоваться.')->keyboard(StartKeyboard::handle())->send();
     }
-
-
     public function auth(): void
     {
         TelegraphUserState::query()->updateOrCreate(
@@ -63,7 +61,23 @@ class TelegramHandler extends WebhookHandler
         );
         $this->chat->message(' Введите сначала логин. Пример: Иванов И.В.')->send();
     }
+    public function help(): void
+    {
+        $text = "👋 Добро пожаловать! Обратите внимание:\n"
+            . "Доступ к информации имеют только <b>авторизованные пользователи</b>.\n\n"
+            . "Для корректной работы выполните следующие шаги:\n"
+            . "1️⃣ Нажмите кнопку «Установить станцию»\n"
+            . "2️⃣ Затем нажмите «Определить местоположение»\n"
+            . "3️⃣ После этого станет доступна кнопка «Список заданий»\n\n"
+            . "⚠️ Важно:\n"
+            . "- Следуйте шагам строго по порядку.\n"
+            . "- Только после выполнения первых двух шагов вы сможете просматривать задания.\n\n"
+            . "🔒 По окончании работы нажмите кнопку «Выйти» для завершения сессии.\n\n"
+            . "Если возникнут вопросы, обращайтесь в службу поддержки:\n"
+            . "📞 Телефон поддержки: +7 (123) 456-78-90";
 
+        $this->chat->message($text)->send();
+    }
 
 //СПИСОК ЗАДАНИЙ
     public function showTripsList()
@@ -89,7 +103,7 @@ class TelegramHandler extends WebhookHandler
     {
         $this->initDependencies();
 
-        $this->warehouseAcceptance->selectTtnTrip($this->messageId, $this->data->get('ttnId'), $this->data->get('tripId'));
+        $this->warehouseAcceptance->selectTtnTrip( $this->data->get('ttnId'), $this->data->get('tripId'));
 
     }
     public function moveByOrder()
@@ -105,14 +119,6 @@ class TelegramHandler extends WebhookHandler
 
         $this->warehouseAcceptance->completeAcceptation($this->data->get('tripId'), $this->data->get('ttnTripId'));
     }
-
-    public function cancelEvent()
-    {
-        $this->initDependencies();
-
-        $this->warehouseAcceptance->cancelEvent($this->data->get('tripId'));
-    }
-
     public function finishAcceptation()
     {
         $this->initDependencies();
@@ -126,7 +132,7 @@ class TelegramHandler extends WebhookHandler
     {
         $this->initDependencies();
 
-        $this->completeTask->handle($this->data->get('tripId'));
+        $this->completeTask->handle($this->messageId ,$this->data->get('tripId'));
     }
     public function getAddressList()
     {
@@ -165,7 +171,7 @@ class TelegramHandler extends WebhookHandler
     public function finishTask()
     {
         $this->initDependencies();
-        $this->finishTask->handle($this->data->get('tripId'));
+        $this->finishTask->handle($this->messageId ,$this->data->get('tripId'));
     }
     public function arrivedToUnload()
     {

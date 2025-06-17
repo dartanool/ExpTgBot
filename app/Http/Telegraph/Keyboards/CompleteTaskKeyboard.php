@@ -30,7 +30,9 @@ class CompleteTaskKeyboard
     public static function createDetailsKeyboard(GetTaskDTO $trip): Keyboard
     {
         return Keyboard::make()
-            ->button('✅Список адресов')->action('getAddressList')->param('tripId', $trip->id);
+            ->button('✅Список адресов')->action('getAddressList')->param('tripId', $trip->id)
+            ->button('❌ Назад')->action('selectTrip')->param('tripId', $trip->id);
+
     }
 
 }

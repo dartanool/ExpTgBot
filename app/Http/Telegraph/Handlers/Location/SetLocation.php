@@ -17,6 +17,7 @@ class SetLocation
         $this->expeditorApiService = new ExpeditorApiService($chat->chat_id);
         $this->chat = $chat;
     }
+    //Сохранение долготы и широты
     public function handleLocation($location): void
     {
         TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->update(
@@ -26,7 +27,7 @@ class SetLocation
             ]
         );
 
-        $this->chat->message('Данные о вашем местоположении сохранены')->send();
+        $this->chat->message('Данные о вашем местоположении сохранены.')->send();
 
     }
     public function location()
@@ -38,6 +39,7 @@ class SetLocation
         $this->chat->message('Введите сначала город. Пример: Москва')->send();
     }
 
+    //Получение города и сохранение Id станции
     public function setCity(string $city)
     {
         $cityId = $this->expeditorApiService->getCityId($city);

@@ -21,17 +21,22 @@ class CompleteAuthHandler
         $token = $this->expeditorApiService->getSession($login, $password);
 
         if (isset($token)) {
-            $this->chat->message("Вы успешно авторизовались")->replyKeyboard(MainKeyboard::handle())->send();
-
-            TelegraphUsers::updateOrCreate(
+            TelegraphUsers::query()->updateOrCreate(
                 ['user_id' => $this->chat->chat_id],
                 ['token' => $token]
             );
+            $this->chat->message("Вы успешно авторизовались")->send();
 
-            TelegraphUserState::where('user_id', $this->chat->chat_id)->delete();
+            $this->chat->message("Выполните действия в следующем порядке:\n\n"
+                . "1️⃣ Нажмите кнопку «Установить станцию»\n"
+                . "2️⃣ Затем — «Определить местоположение»\n"
+                . "3️⃣ После этого станет доступна кнопка «Список заданий»\n\n"
+                . "Это необходимо для корректной работы бота и получения актуальной информации.")->replyKeyboard(MainKeyboard::handle())->send();
+
+            TelegraphUserState::query()->where('user_id', $this->chat->chat_id)->delete();
         } else {
-            $this->chat->message("Повторите регистрацию")->send();
-
+            $this->chat->message("Логин или пароль неверен. Повторите регистрацию")->send();
+            TelegraphUserState::query()->where('user_id', $this->chat->chat_id)->delete();
         }
     }
 }

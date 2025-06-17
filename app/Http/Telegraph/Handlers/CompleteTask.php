@@ -23,14 +23,15 @@ class CompleteTask
         $this->expeditorApiService = new ExpeditorApiService($chat->chat_id);
     }
 
-    public function handle(string $tripId)
+    public function handle(int $messageId, string $tripId)
     {
+        $this->chat->deleteMessage($messageId)->send();
+
         $this->expeditorApiService->completeTask($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon);
 
         $response = $this->expeditorApiService->getTaskList();
         $trip = $this->expeditorApiService->getTripById($tripId, $response->trips);
-        $this->chat->message($this->formatTripDetails($trip))->keyboard(CompleteTaskKeyboard::createDetailsKeyboard($trip))
-            ->send();
+        $this->chat->message($this->formatTripDetails($trip))->keyboard(CompleteTaskKeyboard::createDetailsKeyboard($trip))->send();
     }
 
     public function getAddressList(int $messageId, string $tripId)
@@ -123,8 +124,8 @@ class CompleteTask
 
     protected function sendAddressCard(GetAddressDTO $address): string
     {
-       return "🏢 Клиент: {$address->clientName}\n"
-            . "📌 Адрес: {$address->address}\n"
+       return "🏢 Клиент: {$address->clientName}\n\n"
+            . "📌 Адрес: {$address->address}\n\n"
             . "🕒 Часы работы: {$address->workHours}\n"
             . "📍 [Карта](https://yandex.ru/maps/?ll={$address->lon},{$address->lat})";
 

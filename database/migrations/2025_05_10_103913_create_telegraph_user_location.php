@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('telegraph_user_locations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->unique()->references('user_id')->on('telegraph_users')->onDelete('cascade');;
+            $table->foreignId('user_id')->unique()->references('user_id')->on('telegraph_users');
             $table->integer('city_id')->nullable();
             $table->string('station_id')->nullable();
             $table->string('event_lat')->nullable();

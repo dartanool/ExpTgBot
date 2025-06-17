@@ -24,6 +24,8 @@ class AddressKeyboard
                 ->param('tripId', $tripId);
         }
 
+        $keyboard->button('❌ Назад')->action('completeTask')->param('tripId', $tripId);
+
         return $keyboard;
     }
 

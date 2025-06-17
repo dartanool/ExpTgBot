@@ -13,6 +13,7 @@ class SetPasswordHandler
     }
     public function handle(string $password) : void
     {
+
         $data = TelegraphUserState::query()->where('user_id', $this->chat->chat_id)->first();
 
         (new CompleteAuthHandler($this->chat))->handle($data->data, $password);
