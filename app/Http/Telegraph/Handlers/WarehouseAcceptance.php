@@ -63,11 +63,9 @@ class WarehouseAcceptance
 
         if ($location->event_lat & $location->event_lon) {
             $response = $this->expeditorApiService->finishAcceptation($tripId, $location->event_lat, $location->event_lon);
-            $this->chat->message('lf')->send();
         } else {
             $this->chat->message('Необходимо выполнить команду 📍 Отправить местоположение')->send();
         }
-        $this->chat->message('Finish acceptation')->send();
     }
 
     private function formatTtnTripDetails(GetTtnTripDTO $trip): string
