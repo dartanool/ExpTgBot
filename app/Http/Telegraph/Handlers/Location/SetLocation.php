@@ -39,7 +39,7 @@ class SetLocation
         $this->chat->message('Введите сначала город. Пример: Москва')->send();
     }
 
-    //Получение города и сохранение Id станции
+    //Получение города и сохранение Id города
     public function setCity(string $city)
     {
         $cityId = $this->expeditorApiService->getCityId($city);

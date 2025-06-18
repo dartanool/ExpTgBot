@@ -4,7 +4,7 @@ namespace App\Http\Telegraph\Handlers;
 
 use App\DTO\GetTaskDTO;
 use App\Http\Services\ExpeditorApiService;
-use App\Http\Telegraph\Keyboards\WarehouseActionKeyboard;
+use App\Http\Telegraph\Keyboards\TaskActionKeyboard;
 use App\Http\Telegraph\Keyboards\TaskListKeyboard;
 use App\Models\Telegraph\TelegraphUserLocation;
 use DefStudio\Telegraph\Models\TelegraphChat;
@@ -43,7 +43,7 @@ class GetTaskList
         $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
         $this->expeditorApiService->markAsRead($tripId, $location->event_lat, $location->event_lon);
 
-        $this->chat->message($this->formatTripDetails($trip))->keyboard(WarehouseActionKeyboard::handle($tripId))->send();
+        $this->chat->message($this->formatTripDetails($trip))->keyboard(TaskActionKeyboard::handle($tripId))->send();
 
     }
 
