@@ -8,26 +8,24 @@ use Illuminate\Support\Facades\Log;
 
 class ExpeditorClient
 {
-    private string $apiToken;
     private string $baseUrl;
     private string $userId;
     public function __construct(string $userId)
     {
         $this->userId = $userId;
-        $this->apiToken = env('API_TOKEN');
         $this->baseUrl = env('API_BASE_URL');
     }
 
-    public function auth(string $method, array $data)
+    public function auth(string $method, string $data)
     {
         $response = Http::withHeaders([
-            'Authorization' => 'Basic '. $this->apiToken,
+            'Authorization' => 'Basic '. $data,
             'Content-Type' => 'application/json',
-        ])->post($this->baseUrl.$method, $data);
+        ])->post($this->baseUrl.$method);
 
         // Логирование полного ответа
         Log::debug('API Response', [
-            'status' => $response->status(),
+            'status' => $data,
             'body' => $response->body()
         ]);
 

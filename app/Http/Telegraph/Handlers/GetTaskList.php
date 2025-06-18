@@ -43,8 +43,13 @@ class GetTaskList
         $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
         $this->expeditorApiService->markAsRead($tripId, $location->event_lat, $location->event_lon);
 
-        $this->chat->message($this->formatTripDetails($trip))->keyboard(TaskActionKeyboard::handle($tripId))->send();
 
+
+        if ($trip->statusReady === 1) {
+            $this->chat->message($this->formatTripDetails($trip))->keyboard(TaskActionKeyboard::handle($tripId))->send();
+        } else {
+            $this->chat->message($this->formatTripDetails($trip))->send();
+        }
     }
 
     private function formatTripDetails(GetTaskDTO $trip): string

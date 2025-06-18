@@ -181,14 +181,11 @@ class ExpeditorApiService
 
     public function getSession(string $login, string $password)
     {
-        $data = [
-            'Username' => $login,
-            'Password' => $password
-        ];
+        $data = "{$login}:{$password}";
+        $encodedText = base64_encode($data);
 
         $method ='GetSession';
-        $response = $this->expeditorClient->auth($method, $data);
-
+        $response = $this->expeditorClient->auth($method, $encodedText);
 
         return $response['Pragma'] ?? null;
     }
