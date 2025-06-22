@@ -2,6 +2,8 @@
 
 namespace App\Http\Services;
 
+use App\DTO\CompleteTaskGetTtnTripDTO;
+use App\DTO\CompleteTaskGetTtnTripListDTO;
 use App\DTO\GetAddressDTO;
 use App\DTO\GetAddressListDTO;
 use App\DTO\GetClientDTO;
@@ -124,6 +126,20 @@ class ExpeditorApiService
             trips: $ttns,
         );
     }
+    public function parseCompleteTaskTtnApiResponse(array $apiResponse): CompleteTaskGetTtnTripListDTO
+    {
+        $ttns = [];
+        $count = 0;
+        foreach ($apiResponse['result'] as $item) {
+            $ttns[] = new CompleteTaskGetTtnTripDTO($count, $item);
+            $count ++;
+        }
+
+        return new CompleteTaskGetTtnTripListDTO(
+            success: $apiResponse['result'] === '1',
+            trips: $ttns,
+        );
+    }
 
     public function getTtnTripById(int $ttnTripId, array $ttns)
     {
@@ -168,11 +184,10 @@ class ExpeditorApiService
 
     }
 
-    public function getClientByName(string $clientName, array $clients) :GetClientDTO
+    public function getClientById(string $clientId, array $clients) :GetClientDTO
     {
-        Telegraph::message("$clientName")->send();
         foreach ($clients as $client){
-            if ($client->clientName === $clientName)
+            if ($client->id === $clientId)
                 return $client;
         }
         throw new \Exception(" Address не найдено");
@@ -322,25 +337,6 @@ class ExpeditorApiService
 
         return $this->expeditorClient->send($this->method, $data);
     }
-    public function completeAcceptation(string $tripId, int $ttnTripId, string $eventLat, string $eventLon)
-    {
-        $data = [
-            "init" => [
-                "type" => "data",
-                "report" => "te.event.w"
-            ],
-            "params" => [
-                "eventCode" => "st.2.72.0",
-                "eventIdTrip" => $tripId,
-                "eventIdTtnTrip" => $ttnTripId,
-                "eventLat" => $eventLat,
-                "eventLon" => $eventLon,
-                "eventAddr"
-            ]
-        ];
-
-        return $this->expeditorClient->send($this->method, $data);
-    }
 
     public function cancelEvent(string $tripId)
     {
@@ -467,6 +463,72 @@ class ExpeditorApiService
         return $this->parseClientApiResponse($response);
     }
 
+    public function getTtnsByAddressClient(string $tripId, string $clientName, string $address)
+    {
+        $data = [
+            "init" => [
+                "type" => "data",
+                "report" => "te.ttnTripList.r"
+            ],
+            "params" => [
+                "idTrip" =>  $tripId,
+                "Client" => $clientName,
+                "Addr" => $address
+            ]
+        ];
+
+//        $data = [
+//            "init" => [
+//                "type" => "data",
+//                "report" => "te.troubles.r"
+//            ],
+//            "params" => [
+//                "idTrip" =>  $tripId,
+//                "Client" => $clientName,
+//                "Addr" => $address
+//            ]
+//        ];
+
+        $response = $this->expeditorClient->send($this->method, $data);
+
+        return $this->parseCompleteTaskTtnApiResponse($response);
+    }
+
+    public function setTtnStatusReceived(string $ttnId, string $eventLat, string $eventLon)
+    {
+        $data = [
+            "init" => [
+                "type" => "data",
+                "report" => "te.event.w"
+            ],
+            "params" => [
+                "eventCode" => "st.2.49.0",
+                "eventIdTtnTrip" => $ttnId,
+                "eventLat" => $eventLat,
+                "eventLon" => $eventLon,
+            ]
+        ];
+
+        $response = $this->expeditorClient->send($this->method, $data);
+    }
+
+    public function setTtnStatusIssued(string $ttnId, string $eventLat, string $eventLon)
+    {
+        $data = [
+            "init" => [
+                "type" => "data",
+                "report" => "te.event.w"
+            ],
+            "params" => [
+                "eventCode" => "st.2.59.0",
+                "eventIdTtnTrip" => $ttnId,
+                "eventLat" => $eventLat,
+                "eventLon" => $eventLon,
+            ]
+        ];
+
+        $response = $this->expeditorClient->send($this->method, $data);
+    }
 
     //ЗАВЕРШЕНИЕ ЗАДАНИЯ
     public function arrivedToUnload(string $tripId, string $eventLat, string $eventLon)

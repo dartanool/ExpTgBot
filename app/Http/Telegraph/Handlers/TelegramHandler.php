@@ -115,12 +115,6 @@ class TelegramHandler extends WebhookHandler
         $this->warehouseAcceptance->moveByOrder($this->data->get('tripId'),  $this->data->get('ttnTripId'));
     }
     //
-    public function completeAcceptation()
-    {
-        $this->initDependencies();
-
-        $this->warehouseAcceptance->completeAcceptation($this->data->get('tripId'), $this->data->get('ttnTripId'));
-    }
     public function finishAcceptation()
     {
         $this->initDependencies();
@@ -165,10 +159,30 @@ class TelegramHandler extends WebhookHandler
     public function selectClient()
     {
         $this->initDependencies();
-        $this->completeTask->selectClient($this->data->get('clientName'), $this->data->get('addressId') );
+        $this->completeTask->selectClient($this->data->get('clientId'), $this->data->get('addressId') );
     }
 
+    public function completeTaskSelectTtnTrip()
+    {
+        $this->initDependencies();;
+        $this->completeTask->selectTtnTrip($this->data->get('data'), $this->data->get('ttnId'));
+    }
+    public function setTtnStatusReceived()
+    {
+        $this->initDependencies();;
+        $this->completeTask->setTtnStatusReceived($this->data->get('ttnId'));
+    }
+    public function setTtnStatusIssued()
+    {
+        $this->initDependencies();;
+        $this->completeTask->setTtnStatusIssued($this->data->get('ttnId'));
+    }
+    public function failOrder()
+    {
+        $this->initDependencies();;
+        $this->completeTask->failOrder($this->data->get('ttnId'));
 
+    }
     //ЗАВЕРШИТЬ ЗАДАНИЕ
     public function finishTask()
     {

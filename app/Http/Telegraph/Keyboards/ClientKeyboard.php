@@ -19,7 +19,7 @@ class ClientKeyboard
 
 
             $keyboard->button($buttonText)
-                ->action('selectClient')->param('clientName', $client->clientName)->param('addressId', $addressId);
+                ->action('selectClient')->param('clientId', $client->id)->param('addressId', $addressId);
         }
 
         // Добавляем кнопку "Отмена"

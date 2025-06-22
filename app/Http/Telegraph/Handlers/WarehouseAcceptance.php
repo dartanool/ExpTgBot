@@ -35,18 +35,7 @@ class WarehouseAcceptance
         $this->chat->message($this->formatTtnTripDetails($ttn))->keyboard(WarehouseTtnsKeyboard::createDetailsKeyboard($ttn, $tripId))
             ->send();
     }
-    public function completeAcceptation(string $tripId, int $ttnTripId)
-    {
-        $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
 
-        if ($location->event_lat && $location->event_lon) {
-            $ttns = $this->expeditorApiService->acceptanceFromWarehouse($tripId);
-            $ttn = $this->expeditorApiService->getTtnTripById($ttnTripId, $ttns->trips);
-            $response = $this->expeditorApiService->completeAcceptation($tripId, $ttn->idAexTtnTrip, $location->event_lat, $location->event_lon);
-        } else {
-            $this->chat->message('Необходимо выполнить команду 📍 Отправить местоположение')->send();
-        }
-    }
     public function moveByOrder(string $tripId, int $ttnTripId)
     {
         $ttns = $this->expeditorApiService->acceptanceFromWarehouse($tripId);

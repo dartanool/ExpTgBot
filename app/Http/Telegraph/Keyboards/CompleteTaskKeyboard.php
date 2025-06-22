@@ -2,7 +2,9 @@
 
 namespace App\Http\Telegraph\Keyboards;
 
+use App\DTO\CompleteTaskGetTtnTripDTO;
 use App\DTO\GetTaskDTO;
+use App\DTO\GetTtnTripListDTO;
 use DefStudio\Telegraph\Keyboard\Keyboard;
 
 class CompleteTaskKeyboard
@@ -35,4 +37,32 @@ class CompleteTaskKeyboard
 
     }
 
+    public static function buildTripOrdersKeyboard(array $ttns, string $data)
+    {
+        $keyboard = Keyboard::make();
+
+        foreach($ttns as $ttn) {
+
+            $buttonText = sprintf(
+                "📍 %s ",
+                $ttn->ID_AEX_TTNTRIP );
+
+            $keyboard->button($buttonText)
+                ->action('completeTaskSelectTtnTrip')
+                ->param('ttnId', $ttn->id)
+                ->param('data', $data);
+        }
+
+        return $keyboard;
+    }
+//Событие
+    public static function createDetailsKeyboardForEvent(CompleteTaskGetTtnTripDTO $ttn): Keyboard
+    {
+        return Keyboard::make()
+            ->button('Получение отправления (ТТН) по поручению')->action('setTtnStatusReceived')->param('ttnId', $ttn->ID_AEX_TTNTRIP)
+            ->button('Выдача отправления (ТТН) по поручению')->action('setTtnStatusIssued')->param('ttnId',$ttn->ID_AEX_TTNTRIP)
+            ->button('Поручение не выполнено')->action('failOrder')->param('ttnId',$ttn->ID_AEX_TTNTRIP)
+            ->button('❌ Назад')->action('selectTrip')->param('ttnId', $ttn->id);
+
+    }
 }

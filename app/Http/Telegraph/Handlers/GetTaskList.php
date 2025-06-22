@@ -21,13 +21,13 @@ class GetTaskList
     }
     public function handle()
     {
-        $data = TelegraphUserLocation::query()->where('user_id',$this->chat->chat_id)->first();
+        $location = TelegraphUserLocation::query()->where('user_id',$this->chat->chat_id)->first();
 
-        if ($data->event_lon && $data->event_lat) {
+        if ($location->event_lon && $location->event_lat &&  $location->station_id) {
             $response = $this->expeditorApiService->getTaskList();
             $this->chat->message('Список текущих и плановых заданий:')->keyboard(TaskListKeyboard::handle($response->trips))->send();
         } else {
-            $this->chat->message("Передайте данные о местоположении.\nНажмите: Определить местоположение")->send();
+            $this->chat->message("Передайте данные о местоположении.\nНажмите: Установите станцию и Определить местоположение")->send();
         }
     }
     /**

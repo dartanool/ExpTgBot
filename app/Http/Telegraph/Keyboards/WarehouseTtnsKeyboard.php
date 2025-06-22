@@ -15,7 +15,7 @@ class WarehouseTtnsKeyboard
 
             $buttonText = sprintf(
                 "📍 %s ",
-                $ttn->idAexTtnTrip);
+                $ttn->prchStrNom);
 
             $keyboard->button($buttonText)
                 ->action('selectTtnTrip')
@@ -32,7 +32,6 @@ class WarehouseTtnsKeyboard
     public static function createDetailsKeyboard(GetTtnTripDTO $trip, string $tripId): Keyboard
     {
         return Keyboard::make()
-            ->button('✅ Груз погружен')->action('completeAcceptation')->param('tripId', $tripId)->param('ttnTripId',$trip->id)
             ->button('📍 Перемещение отправления на ТС по поручению  ')->action('moveByOrder')->param('tripId', $tripId)->param('ttnTripId',$trip->id)
             ->button('🔙 Окончил приём')->action('finishAcceptation')->param('tripId', $tripId)
             ->button('❌ Назад')->action('acceptanceFromWarehouse')->param('tripId', $tripId);
