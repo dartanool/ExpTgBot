@@ -529,6 +529,25 @@ class ExpeditorApiService
 
         $response = $this->expeditorClient->send($this->method, $data);
     }
+    public function setFailOrder(string $ttnId, string $eventLat, string $eventLon, int $eventCodePT)
+    {
+        $data = [
+            "init" => [
+                "type" => "data",
+                "report" => "te.event.w"
+            ],
+            "params" => [
+                "eventCode" => "st.2.70.x",
+                "eventIdTtnTrip" => $ttnId,
+                "eventLat" => $eventLat,
+                "eventLon" => $eventLon,
+                "eventCodePT" => $eventCodePT
+            ]
+        ];
+
+        $response = $this->expeditorClient->send($this->method, $data);
+    }
+
 
     //ЗАВЕРШЕНИЕ ЗАДАНИЯ
     public function arrivedToUnload(string $tripId, string $eventLat, string $eventLon)

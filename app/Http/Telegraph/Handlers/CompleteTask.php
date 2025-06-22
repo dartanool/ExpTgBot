@@ -11,8 +11,8 @@ use App\Http\Services\ExpeditorApiService;
 use App\Http\Telegraph\Keyboards\AddressKeyboard;
 use App\Http\Telegraph\Keyboards\ClientKeyboard;
 use App\Http\Telegraph\Keyboards\CompleteTaskKeyboard;
-use App\Http\Telegraph\Keyboards\WarehouseTtnsKeyboard;
 use App\Models\Telegraph\TelegraphUserLocation;
+use DefStudio\Telegraph\Client\TelegraphResponse;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
 class CompleteTask
@@ -60,25 +60,34 @@ class CompleteTask
         $address = $this->expeditorApiService->getAddressByAddressIdTripId($addressId, $tripId);
 
         $this->expeditorApiService->leftAtAddress($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon,$address->address);
+
+        $response = $this->chat->message("Вы нажали: Убыл по адресу")->send();
+        $this->deleteMessage($response);
     }
     public function arrivedToAddress(string $addressId, string $tripId)
     {
         $address = $this->expeditorApiService->getAddressByAddressIdTripId($addressId, $tripId);
-
         $this->expeditorApiService->arrivedToAddress($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon, $address->address);
+
+        $response = $this->chat->message("Вы нажали: Прибыл по адресу")->send();
+        $this->deleteMessage($response);
     }
 
-    public function getClientListByAddress(string $addressId, string $tripId)
+    public function getClientListByAddress(int $messageId, string $addressId, string $tripId)
     {
+        $this->chat->deleteMessage($messageId)->send();
+
         $address = $this->expeditorApiService->getAddressByAddressIdTripId($addressId, $tripId);
 
         $clientList = $this->expeditorApiService->getClientList($tripId, $address->address);
 
-        $this->chat->message("Список клиентов по адресу: $address->address")->keyboard(ClientKeyboard::handle($clientList->clients, $addressId, $tripId))->send();
+        $this->chat->message("Список клиентов по адресу:  \n$address->address")->keyboard(ClientKeyboard::handle($clientList->clients, $addressId, $tripId))->send();
     }
 
-    public function selectClient(string $clientId, string $addressId)
+    public function selectClient(int $messageId, string $clientId, string $addressId)
     {
+        $this->chat->deleteMessage($messageId)->send();
+
         $cityId = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
 
         $tripId = $this->expeditorApiService->getCurrentTask($cityId->city_id);
@@ -91,15 +100,13 @@ class CompleteTask
         $ttns = $this->expeditorApiService->getTtnsByAddressClient($tripId, $client->clientName, $address->address);
 
         $data = "{$client->id}/{$addressId}";
-        $this->chat->message("{$data}")->send();
 
-        foreach ($ttns->trips as $ttn) {
-            $ttn->setClient($client);
-        }
-        $this->chat->message($this->sendClientCard($client))->keyboard(CompleteTaskKeyboard::buildTripOrdersKeyboard($ttns->trips,$data))->send();
+        $this->chat->message($this->sendClientCard($client))->keyboard(CompleteTaskKeyboard::buildTripOrdersKeyboard($ttns->trips, $data))->send();
     }
-    public function selectTtnTrip( string $data, int $ttnId)
+    public function selectTtnTrip(int $messageId, string $data, int $ttnId)
     {
+        $this->chat->deleteMessage($messageId)->send();
+
         $cityId = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
         $tripId = $this->expeditorApiService->getCurrentTask($cityId->city_id);
 
@@ -113,24 +120,36 @@ class CompleteTask
 
         $ttns = $this->expeditorApiService->getTtnsByAddressClient($tripId, $client->clientName, $address->address);
         $ttn = $this->expeditorApiService->getTtnTripById($ttnId, $ttns->trips);
+        $ttn->setClient($client);
+        $ttn->setAddress($address);
 
-
-
+//        $this->chat->message("{$ttn->clientDTO->id}")->send();
         $this->chat->message($this->sendTripOrderCard($ttn))->keyboard(CompleteTaskKeyboard::createDetailsKeyboardForEvent($ttn)) ->send();
     }
     //Получение отправления (ТТН) по поручению
     public function setTtnStatusReceived(int $ttnId)
     {
        $this->expeditorApiService->setTtnStatusReceived($ttnId,$this->getLocation()->event_lat, $this->getLocation()->event_lon);
+
+        $response = $this->chat->message("Вы нажали: Получение отправления (ТТН) по поручению")->send();
+        $this->deleteMessage($response);
     }
     //Выдача отправления (ТТН) по поручению
     public function setTtnStatusIssued(int $ttnId)
     {
         $this->expeditorApiService->setTtnStatusIssued($ttnId,$this->getLocation()->event_lat, $this->getLocation()->event_lon);
+
+        $response = $this->chat->message("Вы нажали: Выдача отправления (ТТН) по поручению")->send();
+        $this->deleteMessage($response);
     }
-    public function failOrder()
+    public function failOrder(string $ttnId)
     {
-//        $this->chat->message("Выберите причину")->keyboard(CompleteTaskKeyboard::)
+        $this->chat->message("Выберите причину")->keyboard(CompleteTaskKeyboard::failOrder($ttnId))->send();
+    }
+    public function setFailOrder(int $messageId, string $ttnId, int $eventCodePt)
+    {
+        $this->chat->deleteMessage($messageId)->send();
+        $this->expeditorApiService->setFailOrder($ttnId, $this->getLocation()->event_lat,  $this->getLocation()->event_lon, $eventCodePt);
     }
 
     private function getLocation()
@@ -217,6 +236,10 @@ class CompleteTask
             . "🧳 Багажных мест: {$order->PRCH_BAG_MEST}\n\n"
             . "📍 [Карта](https://yandex.ru/maps/?ll={$order->AEXO_LON_ADR},{$order->AEXO_LAT_ADR})";
     }
-
+    private function deleteMessage(TelegraphResponse $response)
+    {
+        sleep(3);
+        $this->chat->deleteMessage($response->telegraphMessageId())->send();
+    }
 }
 

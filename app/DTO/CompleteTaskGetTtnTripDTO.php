@@ -28,6 +28,7 @@ class CompleteTaskGetTtnTripDTO
     public string $PRCH_CLI_MEST;         // Количество клиентских мест
     public string $PRCH_BAG_MEST;         // Количество багажных мест'
     public GetClientDTO $clientDTO;
+    public GetAddressDTO $addressDTO;
     public function __construct(int $count, array $data)
     {
         $this->id = $count;
@@ -57,5 +58,9 @@ class CompleteTaskGetTtnTripDTO
     public function setClient(GetClientDTO $clientDTO)
     {
         $this->clientDTO = $clientDTO;
+    }
+    public function setAddress(GetAddressDTO $addressDTO)
+    {
+        $this->addressDTO = $addressDTO;
     }
 }

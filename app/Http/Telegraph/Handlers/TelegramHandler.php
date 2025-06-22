@@ -111,15 +111,14 @@ class TelegramHandler extends WebhookHandler
     public function moveByOrder()
     {
         $this->initDependencies();
-
-        $this->warehouseAcceptance->moveByOrder($this->data->get('tripId'),  $this->data->get('ttnTripId'));
+        $this->warehouseAcceptance->moveByOrder( $this->messageId ,$this->data->get('tripId'),  $this->data->get('ttnTripId'));
     }
     //
     public function finishAcceptation()
     {
         $this->initDependencies();
 
-        $this->warehouseAcceptance->finishAcceptation($this->data->get('tripId'));
+        $this->warehouseAcceptance->finishAcceptation($this->messageId, $this->data->get('tripId'));
     }
 
 
@@ -154,18 +153,18 @@ class TelegramHandler extends WebhookHandler
     public function getClientList()
     {
         $this->initDependencies();
-        $this->completeTask->getClientListByAddress($this->data->get('addressId'),$this->data->get('tripId'));
+        $this->completeTask->getClientListByAddress($this->messageId ,$this->data->get('addressId'),$this->data->get('tripId'));
     }
     public function selectClient()
     {
         $this->initDependencies();
-        $this->completeTask->selectClient($this->data->get('clientId'), $this->data->get('addressId') );
+        $this->completeTask->selectClient($this->messageId ,$this->data->get('clientId'), $this->data->get('addressId') );
     }
 
     public function completeTaskSelectTtnTrip()
     {
         $this->initDependencies();;
-        $this->completeTask->selectTtnTrip($this->data->get('data'), $this->data->get('ttnId'));
+        $this->completeTask->selectTtnTrip($this->messageId ,$this->data->get('data'), $this->data->get('ttnId'));
     }
     public function setTtnStatusReceived()
     {
@@ -183,6 +182,13 @@ class TelegramHandler extends WebhookHandler
         $this->completeTask->failOrder($this->data->get('ttnId'));
 
     }
+    public function setFailOrder()
+    {
+        $this->initDependencies();;
+        $this->completeTask->setFailOrder($this->messageId, $this->data->get('ttnId'),$this->data->get('eventCodePT'));
+
+    }
+
     //ЗАВЕРШИТЬ ЗАДАНИЕ
     public function finishTask()
     {

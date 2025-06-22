@@ -7,6 +7,7 @@ use App\Http\Services\ExpeditorApiService;
 use App\Http\Telegraph\Keyboards\CompleteTaskKeyboard;
 use App\Http\Telegraph\Keyboards\FinishTaskKeyboard;
 use App\Models\Telegraph\TelegraphUserLocation;
+use DefStudio\Telegraph\Client\TelegraphResponse;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
@@ -32,14 +33,23 @@ class FinishTask
     public function arrivedToUnload(string $tripId)
     {
         $this->expeditorApiService->arrivedToUnload($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon);
+
+        $response = $this->chat->message("Вы нажали: Прибыл для разгрузки")->send();
+        $this->deleteMessage($response);
     }
     public function completeDelivery(string $tripId)
     {
         $this->expeditorApiService->completeDelivery($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon);
+
+        $response = $this->chat->message("Вы нажали: Окончил сдачу груза")->send();
+        $this->deleteMessage($response);
     }
     public function submitVehicleAndDocuments(string $tripId)
     {
         $this->expeditorApiService->submitVehicleAndDocuments($tripId, $this->getLocation()->event_lat, $this->getLocation()->event_lon);
+
+        $response = $this->chat->message("Вы нажали: Поставил ТС и сдал документы")->send();
+        $this->deleteMessage($response);
     }
 
     private function getLocation()
@@ -72,5 +82,10 @@ class FinishTask
             2 => 'Завершено',
             default => 'Запланировано',
         };
+    }
+    private function deleteMessage(TelegraphResponse $response)
+    {
+        sleep(3);
+        $this->chat->deleteMessage($response->telegraphMessageId())->send();
     }
 }

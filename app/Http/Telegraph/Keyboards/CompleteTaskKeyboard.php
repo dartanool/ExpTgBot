@@ -39,6 +39,10 @@ class CompleteTaskKeyboard
 
     public static function buildTripOrdersKeyboard(array $ttns, string $data)
     {
+        $newData = explode("/", $data);
+        $addressId = $newData[1];
+        $clientId = $newData[0];
+
         $keyboard = Keyboard::make();
 
         foreach($ttns as $ttn) {
@@ -47,10 +51,11 @@ class CompleteTaskKeyboard
                 "📍 %s ",
                 $ttn->ID_AEX_TTNTRIP );
 
-            $keyboard->button($buttonText)
-                ->action('completeTaskSelectTtnTrip')
-                ->param('ttnId', $ttn->id)
-                ->param('data', $data);
+            $keyboard->button($buttonText)->action('completeTaskSelectTtnTrip')
+                                            ->param('ttnId', $ttn->id)
+                                            ->param('data', $data)
+                ->button('❌ Назад')->action('selectClient')->param('clientId', $clientId)->param('addressId', $addressId);
+
         }
 
         return $keyboard;
@@ -62,7 +67,17 @@ class CompleteTaskKeyboard
             ->button('Получение отправления (ТТН) по поручению')->action('setTtnStatusReceived')->param('ttnId', $ttn->ID_AEX_TTNTRIP)
             ->button('Выдача отправления (ТТН) по поручению')->action('setTtnStatusIssued')->param('ttnId',$ttn->ID_AEX_TTNTRIP)
             ->button('Поручение не выполнено')->action('failOrder')->param('ttnId',$ttn->ID_AEX_TTNTRIP)
-            ->button('❌ Назад')->action('selectTrip')->param('ttnId', $ttn->id);
+            ->button('❌ Назад')->action('selectClient')->param('clientId', $ttn->clientDTO->id)->param('addressId', $ttn->addressDTO->id);
+
+    }
+
+    public static function failOrder(string $ttnId)
+    {
+        return Keyboard::make()
+            ->button('1')->action('setFailOrder')->param('ttnId', $ttnId)->param('eventCodePT', 1)
+            ->button('2')->action('setFailOrder')->param('ttnId',$ttnId)->param('eventCodePT', 2)
+            ->button('3')->action('setFailOrder')->param('ttnId',$ttnId)->param('eventCodePT', 3)
+            ->button('4')->action('setFailOrder')->param('ttnId', $ttnId)->param('eventCodePT', 4);
 
     }
 }
