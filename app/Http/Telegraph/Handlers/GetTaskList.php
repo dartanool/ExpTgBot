@@ -21,9 +21,7 @@ class GetTaskList
     }
     public function handle()
     {
-        $location = TelegraphUserLocation::query()->where('user_id',$this->chat->chat_id)->first();
-
-        if ($location->event_lon && $location->event_lat &&  $location->station_id) {
+        if ($this->checkLocation()) {
             $response = $this->expeditorApiService->getTaskList();
             $this->chat->message('Список текущих и плановых заданий:')->keyboard(TaskListKeyboard::handle($response->trips))->send();
         } else {
@@ -42,8 +40,6 @@ class GetTaskList
 
         $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
         $this->expeditorApiService->markAsRead($tripId, $location->event_lat, $location->event_lon);
-
-
 
         if ($trip->statusReady === 1) {
             $this->chat->message($this->formatTripDetails($trip))->keyboard(TaskActionKeyboard::handle($tripId))->send();
@@ -76,5 +72,19 @@ class GetTaskList
             2 => 'Завершено',
             default => 'Запланировано',
         };
+    }
+    private function checkLocation() : bool
+    {
+        $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
+
+        if (isset($location)) {
+            if ($location->event_lat & $location->event_lon && $location->station_id) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 }

@@ -329,7 +329,7 @@ class ExpeditorApiService
             ],
             "params" => [
                 "eventCode" => "st.2.72.0",
-                "eventIdTrip" => 2252182255931561,
+                "eventIdTrip" => $tripId,
                 "eventLat" => $eventLat,
                 "eventLon" => $eventLon,
             ]

@@ -38,21 +38,23 @@ class WarehouseAcceptance
 
     public function moveByOrder(int $messageId, string $tripId, int $ttnTripId)
     {
-        $ttns = $this->expeditorApiService->acceptanceFromWarehouse($tripId);
-        $ttn = $this->expeditorApiService->getTtnTripById($ttnTripId, $ttns->trips);
+        if ($this->checkLocation()) {
+            $ttns = $this->expeditorApiService->acceptanceFromWarehouse($tripId);
+            $ttn = $this->expeditorApiService->getTtnTripById($ttnTripId, $ttns->trips);
 
-        $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
-        $this->expeditorApiService->moveByOrder($tripId, $ttn->idAexTtnTrip, $location->event_lat, $location->event_lon);
-        $response = $this->chat->message("Вы нажали: Перемещение отправления на ТС по поручению")->send();
-        sleep(3);
-        $this->chat->deleteMessage($response->telegraphMessageId())->send();
+            $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
+            $this->expeditorApiService->moveByOrder($tripId, $ttn->idAexTtnTrip, $location->event_lat, $location->event_lon);
+            $response = $this->chat->message("Вы нажали: Перемещение отправления на ТС по поручению")->send();
+            sleep(3);
+            $this->chat->deleteMessage($response->telegraphMessageId())->send();
+        } else {
+            $this->chat->message('Необходимо выполнить команду 📍 Отправить местоположение')->send();
+        }
     }
 
     public function finishAcceptation(int $messageId, string $tripId)
     {
-        $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
-
-        if ($location->event_lat & $location->event_lon) {
+        if ($this->checkLocation()) {
             $response = $this->expeditorApiService->finishAcceptation($tripId, $location->event_lat, $location->event_lon);
             $response = $this->chat->message("Вы нажали: Окончил прием")->send();
             sleep(3);
@@ -85,6 +87,15 @@ class WarehouseAcceptance
             - Телефон: {$phone}
             - Имя: {$contactName}
             TEXT;
+    }
+    private function checkLocation() : bool
+    {
+        $location = TelegraphUserLocation::query()->where('user_id', $this->chat->chat_id)->first();
+
+        if ($location->event_lat & $location->event_lon && $location->station_id) {
+            return true;
+        }
+        return false;
     }
 
 }
